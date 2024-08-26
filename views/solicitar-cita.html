@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Cita - TEC Consultas</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>Asignar Cita</h1>
+    <form id="asignarCitaForm">
+        <label for="estudianteId">ID del Estudiante:</label>
+        <input type="text" id="estudianteId" name="estudianteId" required>
+
+        <label for="curso">Curso:</label>
+        <input type="text" id="curso" name="curso" required>
+
+        <label for="profesor">Profesor:</label>
+        <input type="text" id="profesor" name="profesor" required>
+
+        <label for="dia">Día:</label>
+        <input type="date" id="dia" name="dia" required>
+
+        <label for="hora">Hora:</label>
+        <input type="text" id="hora" name="hora" placeholder="HH:MM" required>
+
+        <button type="submit">Asignar Cita</button>
+    </form>
+    <a href="/dashboard">Volver al dashboard</a>
+
+    <script>
+        document.querySelector('#asignarCitaForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevenir el envío del formulario por defecto
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/asignarCita', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (result.errors) {
+                        result.errors.forEach(error => {
+                            alert(error.msg); // Mostrar cada error en una alerta
+                        });
+                    } else {
+                        alert(result.error || 'Error al asignar cita'); // Mostrar error general
+                    }
+                } else {
+                    alert('Cita asignada exitosamente');
+                    window.location.href = '/dashboard'; // Redirigir al dashboard
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al asignar cita');
+            }
+        });
+    </script>
+</body>
+</html>
