@@ -1,2 +1,3 @@
-# ProyectoQA
-Proyecto del curso de QA TEC 2024
+﻿# SistemaAdministraciónHorariostec
+
+
