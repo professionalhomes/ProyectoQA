@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Registro de Usuario</h1>
-    <form action="/register" method="POST">
+    <form id="registerForm">
         <label for="carnet">Carnet:</label>
         <input type="text" id="carnet" name="carnet" required>
 
@@ -28,5 +28,40 @@
         <button type="submit">Registrar</button>
     </form>
     <a href="/login">Volver al inicio de sesión</a>
+
+    <script>
+        document.querySelector('#registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevenir el envío del formulario por defecto
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    if (result.errors) {
+                        result.errors.forEach(error => {
+                            alert(error.msg); // Mostrar cada error en una alerta
+                        });
+                    } else {
+                        alert(result.error || 'Error al registrar usuario'); // Mostrar error general
+                    }
+                } else {
+                    alert('Registro exitoso');
+                    window.location.href = '/login'; // Redirigir al login
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al registrar usuario');
+            }
+        });
+    </script>
 </body>
 </html>
