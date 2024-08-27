@@ -1,23 +1,25 @@
 const express = require('express');
 const path = require('path');
-const authController = require('../controllers/authController'); // Asegúrate de que esta ruta sea correcta
+const authController = require('../controllers/authController'); // Asegï¿½rate de que esta ruta sea correcta
 const cursoController = require('../controllers/cursosController');
+const Profesor = require('../models/Profesor'); // AsegÃºrate de que el modelo Profesor estÃ© bien importado
+const Estudiante = require('../models/Estudiante');
 const router = express.Router();
 
-// Página de inicio de sesión
+// Pï¿½gina de inicio de sesiï¿½n
 router.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'login.html'));
 });
 
-// Procesar inicio de sesión
-router.post('/login', authController.login); // Asegúrate de que authController.login esté definido
+// Procesar inicio de sesiï¿½n
+router.post('/login', authController.login); // Asegï¿½rate de que authController.login estï¿½ definido
 
-// Página de registro
+// Pï¿½gina de registro
 router.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'register.html'));
 });
 
-// Página de Dashboard
+// Pï¿½gina de Dashboard
 router.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'dashboard.html'));
 });
@@ -46,7 +48,7 @@ router.get('/student/my-appointments', (req, res) => {
 
 // Opciones del administrador
 router.get('/admin/courses', async (req, res) => {
-        res.sendFile(path.join(__dirname, '..', 'views', 'gestionar-cursos.html'));
+        res.sendFile(path.join(__dirname, '..', 'views', 'GestiÃ³nCursos.html'));
 });
 
 router.get('/admin/professors', (req, res) => {
@@ -59,15 +61,25 @@ router.get('/admin/students', (req, res) => {
 
 router.get('/admin/settings', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'admin-settings.html'));
-});  // <-- Aquí estaba el paréntesis faltante
+});  // <-- Aquï¿½ estaba el parï¿½ntesis faltante
 
 router.get('/admin/reports', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'admin-reports.html'));
 });
 
+router.get('/admin/professors', async (req, res) => {
+    try {
+        const profesores = await Profesor.findAll(); // Obtener la lista de profesores desde la base de datos
+        res.render('asignar-profesor', { profesores });
+    } catch (error) {
+        console.error('Error al obtener profesores:', error);
+        res.status(500).send('Error al obtener profesores');
+    }
+});
+
 // API para obtener datos 
 router.get('/api/user-info', (req, res) => {
-    res.json({ name: req.user.nombre, role: req.user.role }); // Envía datos JSON
+    res.json({ name: req.user.nombre, role: req.user.role }); // Envï¿½a datos JSON
 });
 
 router.get('/admin/courses', async (req, res) => {
@@ -77,13 +89,13 @@ router.get('/admin/courses', async (req, res) => {
 
 // Procesar solicitudes POST
 router.post('/dashboard', authController.register);
-// Procesar la asignación de un profesor a un curso
+// Procesar la asignaciï¿½n de un profesor a un curso
 router.post('/professor/availability', authController.register);
 router.post('/student/appointments', authController.register);
 router.post('/solicitar-cita', authController.register);
 router.post('/register', authController.register);
 
-// Cerrar sesión
-router.get('/logout', authController.logout); // Asegúrate de que authController.logout esté definido
+// Cerrar sesiï¿½n
+router.get('/logout', authController.logout); // Asegï¿½rate de que authController.logout estï¿½ definido
 
 module.exports = router;

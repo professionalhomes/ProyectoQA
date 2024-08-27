@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Curso</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Incluye tu CSS aquí -->
+</head>
+<body>
+    <h1>Crear Curso</h1>
+    <form id="courseForm">
+        <div>
+            <label for="name">Nombre del Curso:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="description">Descripción:</label>
+            <textarea id="description" name="description"></textarea>
+        </div>
+        <div>
+            <label for="start_date">Fecha de Inicio:</label>
+            <input type="date" id="start_date" name="start_date" required>
+        </div>
+        <div>
+            <label for="credits">Créditos:</label>
+            <input type="number" id="credits" name="credits" required>
+        </div>
+        <div>
+            <label for="Profesor_id">Profesor:</label>
+            <select id="Profesor_id" name="Profesor_id" required>
+                <!-- Opciones serán cargadas dinámicamente -->
+            </select>
+        </div>
+        <button type="submit">Crear Curso</button>
+    </form>
+
+    <script src="script.js"></script> <!-- Incluye tu JavaScript aquí -->
+</body>
+</html>

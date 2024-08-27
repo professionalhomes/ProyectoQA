@@ -21,6 +21,7 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "sequelize": "^6.37.3",
+    "sistema-administraci-n-horariostec": "file:",
     "sqlite3": "^5.1.7"
   }
 }

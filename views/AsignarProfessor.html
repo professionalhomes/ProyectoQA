@@ -1,0 +1,37 @@
+<!-- assignProfessor.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Profesor a Curso</title>
+</head>
+<body>
+    <h1>Asignar Profesor a Curso</h1>
+    <form id="assignProfessorForm">
+        <label for="curso_id">ID del Curso:</label>
+        <input type="text" id="curso_id" name="curso_id" required>
+        <br>
+        <label for="profesor_id">ID del Profesor:</label>
+        <input type="text" id="profesor_id" name="profesor_id" required>
+        <br>
+        <button type="submit">Asignar Profesor</button>
+    </form>
+    <script>
+        document.getElementById('assignProfessorForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const curso_id = document.getElementById('curso_id').value;
+            const profesor_id = document.getElementById('profesor_id').value;
+            const response = await fetch('/asignar-profesor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ curso_id, profesor_id })
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        });
+    </script>
+</body>
+</html>

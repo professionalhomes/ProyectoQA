@@ -1,23 +1,24 @@
 const express = require('express');
 const path = require('path');
-const { connectDB } = require('./config/db');
+const { sequelize } = require('./config/db'); // Importa la instancia de sequelize desde tu configuraci贸n
 const passport = require('passport');
 const session = require('express-session');
 const flash = require('connect-flash');
 
-
-
 const Routes = require('./routes/Routes');
 
+// Importar los modelos para asegurarse de que est谩n registrados
+require('./models/User');
+require('./models/Estudiante');
+require('./models/Profesor');
+require('./models/Curso');
 
-// Importar otras rutas si es necesario
-
-// Conectar a la base de datos
-connectDB();
+// Conectar a la base de datos (si `connectDB` es una funci贸n para establecer la conexi贸n)
+// connectDB(); // Esto ya se maneja al importar `sequelize` y no es necesario si ya est谩 gestionado dentro de `db.js`
 
 const app = express();
 
-// Configuraci髇 de middleware
+// Configuraci贸n de middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'views')));
@@ -41,6 +42,13 @@ app.use((req, res, next) => {
 
 // Configurar Passport
 require('./config/passport')(passport);
+
+// Sincronizar los modelos con la base de datos
+sequelize.sync({ alter: true }).then(() => {
+    console.log("All models were synchronized successfully.");
+}).catch(error => {
+    console.error("Error synchronizing models:", error);
+});
 
 // Registrar rutas
 app.use('/', Routes);

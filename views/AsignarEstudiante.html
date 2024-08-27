@@ -1,0 +1,37 @@
+<!-- assignStudent.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignar Estudiante a Curso</title>
+</head>
+<body>
+    <h1>Asignar Estudiante a Curso</h1>
+    <form id="assignStudentForm">
+        <label for="estudiante_id">ID del Estudiante:</label>
+        <input type="text" id="estudiante_id" name="estudiante_id" required>
+        <br>
+        <label for="curso_id">ID del Curso:</label>
+        <input type="text" id="curso_id" name="curso_id" required>
+        <br>
+        <button type="submit">Asignar Estudiante</button>
+    </form>
+    <script>
+        document.getElementById('assignStudentForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const estudiante_id = document.getElementById('estudiante_id').value;
+            const curso_id = document.getElementById('curso_id').value;
+            const response = await fetch('/asignar-estudiante', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ estudiante_id, curso_id })
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        });
+    </script>
+</body>
+</html>
