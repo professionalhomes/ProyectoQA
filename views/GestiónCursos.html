@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Curso</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Incluye tu CSS aquí -->
 </head>
+
 <body>
     <h1>Crear Curso</h1>
     <form id="courseForm">
+        <div>
+            <label for="id">Código:</label>
+            <input type="text" id="id" name="id" required>
+        </div>
         <div>
             <label for="name">Nombre del Curso:</label>
             <input type="text" id="name" name="name" required>
@@ -18,22 +23,82 @@
             <textarea id="description" name="description"></textarea>
         </div>
         <div>
-            <label for="start_date">Fecha de Inicio:</label>
-            <input type="date" id="start_date" name="start_date" required>
+            <label for="semester">Semestre:</label>
+            <select type="text" id="semester" name="semester" required>
+                <option value="Primer Semestre">2024 - Primer Semestre</option>
+                <option value="Segundo Semestre">2024 - Segundo Semestre</option>
+            </select>
         </div>
         <div>
             <label for="credits">Créditos:</label>
             <input type="number" id="credits" name="credits" required>
         </div>
         <div>
-            <label for="Profesor_id">Profesor:</label>
-            <select id="Profesor_id" name="Profesor_id" required>
-                <!-- Opciones serán cargadas dinámicamente -->
+            <label for="profesor_id">Profesor:</label>
+            <select id="profesor_id" name="profesor_id" required>
+                <!-- Opciones estáticas para prueba -->
             </select>
         </div>
-        <button type="submit">Crear Curso</button>
+        <button type="submit">Crear</button>
     </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM completamente cargado y parseado');
+            const profesorSelect = document.getElementById('profesor_id');
+            // Función para cargar profesores
+            async function loadProfessors() {
+                try {
+                    const response = await fetch('/profesores');
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const profesores = await response.json();
+                    console.log('Profesores cargados:', profesores);
+                    // Limpia las opciones existentes
+                    profesorSelect.innerHTML = '';
 
-    <script src="script.js"></script> <!-- Incluye tu JavaScript aquí -->
+                    // Añade nuevas opciones
+                    profesores.forEach(profesor => {
+                        const option = document.createElement('option');
+                        option.value = profesor.id; // Asegúrate de que este campo es correcto
+                        option.textContent = profesor.nombre;
+                        profesorSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los profesores:', error);
+                }
+            }
+            loadProfessors(); // Llama a la función para cargar los profesores
+            // Manejo del envío del formulario
+            document.querySelector('#courseForm').addEventListener('submit', async function (event) {
+                event.preventDefault(); // Evita el envío del formulario tradicional
+                const formData = new FormData(event.target);
+                const data = Object.fromEntries(formData.entries());
+                try {
+                    const response = await fetch('/crear-curso', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (!response.ok) {
+                        if (result.errors) {
+                            result.errors.forEach(error => {
+                                alert(error.msg); // Mostrar cada error en una alerta
+                            });
+                        } else {
+                            alert(result.error || 'Error al registrar ');
+                        }
+                    } else {
+                        alert('Registro exitoso');
+                        courseForm.reset();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error al registrar ');
+                }
+            });
+        });
+    </script>
 </body>
+
 </html>

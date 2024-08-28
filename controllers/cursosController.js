@@ -4,20 +4,41 @@ const Profesor = require('../models/Profesor'); // Asegúrate de que la ruta sea
 
 // Crear un nuevo curso
 exports.createCourse = async (req, res) => {
-    try {
-        const { name, description, start_date, credits, profesor_id } = req.body;
+    const { id, name, description, semester, credits, profesor_id } = req.body;
+    
+    // Convierte el ID del profesor a número si es necesario
+    const profesorId = parseInt(profesor_id, 10);
+    console.log('ID del profesor convertido:', profesorId);
 
-        // Validar que el Profesor exista
-        const profesor = await Profesor.findByPk(profesor_id);
+    try {
+        const profesor = await Profesor.findByPk(profesorId);
+        
         if (!profesor) {
+            console.log('Profesor no encontrado:', profesorId);
             return res.status(400).json({ error: 'Profesor no encontrado' });
         }
 
-        const course = await Course.create({ name, description, start_date, credits, profesor_id });
+        console.log('ID del curso:', id);
+        console.log('Nombre del curso:', name);
+        console.log('Descripción del curso:', description);
+        console.log('Semestre del curso:', semester);
+        console.log('Créditos del curso:', credits);
+        console.log('ID del profesor:', profesor.id); // Usa 'id' en lugar de 'Profesorid'
+
+        // Crear el curso
+        // Asegúrate de que el modelo Course esté bien definido y tenga un campo 'profesor_id'
+        const course = await Course.create({
+            id,
+            name,
+            description,
+            semester,
+            credits,
+            Profesor_id: profesor.id // Asigna el ID del profesor correctamente
+        });
         res.status(201).json(course);
     } catch (error) {
         console.error('Error al crear curso:', error);
-        res.status(500).send('Error al crear curso');
+        res.status(500).json({ error: 'Error al crear curso', message: error.message });
     }
 };
 
@@ -31,6 +52,16 @@ exports.getCourses = async (req, res) => {
     } catch (error) {
         console.error('Error al obtener cursos:', error);
         res.status(500).send('Error al obtener cursos');
+    }
+};
+
+exports.getProfessors = async (req, res) => {
+    try {
+        const profesores = await Profesor.findAll();
+        res.status(200).json(profesores);
+    } catch (error) {
+        console.error('Error al obtener profesores:', error);
+        res.status(500).send('Error al obtener profesores');
     }
 };
 

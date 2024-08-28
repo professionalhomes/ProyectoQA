@@ -5,9 +5,8 @@ const Profesor = require('./Profesor');
 
 const Curso = sequelize.define('Curso', {
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         primaryKey: true,
-        autoIncrement: true,
         allowNull: false
     },
     name: {
@@ -18,8 +17,8 @@ const Curso = sequelize.define('Curso', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    start_date: {
-        type: DataTypes.DATE,
+    semester: {
+        type: DataTypes.TEXT,
         allowNull: false
     },
     credits: {
