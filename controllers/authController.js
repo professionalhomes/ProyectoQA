@@ -29,24 +29,20 @@ exports.register = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-
         try {
             const { carnet, nombre, password, role } = req.body;
             const existingUser = await User.findOne({ where: { carnet } });
             if (existingUser) {
                 return res.status(400).json({ error: 'El carnet ya está en uso' });
             }
-
             const hashedPassword = await bcrypt.hash(password, 10);
             const user = await User.create({ carnet, nombre, password: hashedPassword, role });
-
             // Dependiendo del rol, crear una instancia de Estudiante o Profesor
             if (role === 'estudiante') {
                 await Estudiante.create({ carnet, nombre, user_id: user.id });
             } else if (role === 'profesor') {
                 await Profesor.create({ carnet, nombre, user_id: user.id });
             }
-
             res.redirect('/login');
         } catch (error) {
             console.error('Error al registrar usuario:', error);
@@ -54,7 +50,6 @@ exports.register = [
         }
     }
 ];
-
 // Obtener usuario por ID
 exports.getUserById = async (req, res) => {
     try {
@@ -63,25 +58,21 @@ exports.getUserById = async (req, res) => {
             where: { carnet },  
             attributes: ['nombre', 'role']  // Solo devuelve nombre y rol
         });
-
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
-
         res.json(user);  // Enviar los datos del usuario al frontend
     } catch (error) {
         console.error('Error al obtener el usuario:', error);
         res.status(500).json({ message: 'Error al obtener el usuario' });
     }
 };
-
 // Inicio de sesión
 exports.login = passport.authenticate('local', {
     successRedirect: '/dashboard',
     failureRedirect: '/login',
     failureFlash: true
 });
-
 // Cerrar sesión
 exports.logout = (req, res) => {
     req.logout((err) => {

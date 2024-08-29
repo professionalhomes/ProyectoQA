@@ -1,12 +1,18 @@
-// models/Curso.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 const Profesor = require('./Profesor');
+const Estudiante = require('./Estudiante'); // Import Estudiante
+const CursoEstudiante = require('./CursoEstudiante'); // Import CursoEstudiante
 
 const Curso = sequelize.define('Curso', {
     id: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
+        allowNull: false
+    },
+    codigo: {
+        type: DataTypes.TEXT,
         allowNull: false
     },
     name: {
@@ -34,10 +40,13 @@ const Curso = sequelize.define('Curso', {
         allowNull: false
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    tableName: 'Cursos'
 });
 
-// Definir la relación
+// Define associations
 Curso.belongsTo(Profesor, { foreignKey: 'Profesor_id', as: 'profesor' });
+
+
 
 module.exports = Curso;

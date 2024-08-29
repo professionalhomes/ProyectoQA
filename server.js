@@ -1,6 +1,11 @@
 const express = require('express');
 const path = require('path');
-const { sequelize } = require('./config/db'); // Importa la instancia de sequelize desde tu configuración
+const { sequelize } = require('./config/db'); 
+const Curso = require('./models/Curso');
+const Estudiante = require('./models/Estudiante');
+const CursoEstudiante = require('./models/CursoEstudiante');
+const Profesor = require('./models/Profesor');
+const User = require('./models/User');// Importa la instancia de sequelize desde tu configuración
 const passport = require('passport');
 const session = require('express-session');
 const flash = require('connect-flash');
@@ -32,7 +37,7 @@ app.use((req, res, next) => {
 // Configurar Passport
 require('./config/passport')(passport);
 // Sincronizar los modelos con la base de datos
-sequelize.sync({ alter: true }).then(() => {
+sequelize.sync({ force: true }).then(() => {
     console.log("All models were synchronized successfully.");
 }).catch(error => {
     console.error("Error synchronizing models:", error);

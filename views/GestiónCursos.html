@@ -11,8 +11,8 @@
     <h1>Crear Curso</h1>
     <form id="courseForm">
         <div>
-            <label for="id">Código:</label>
-            <input type="text" id="id" name="id" required>
+            <label for="codigo">Código:</label>
+            <input type="text" id="codigo" name="codigo" required>
         </div>
         <div>
             <label for="name">Nombre del Curso:</label>
@@ -56,7 +56,6 @@
                     console.log('Profesores cargados:', profesores);
                     // Limpia las opciones existentes
                     profesorSelect.innerHTML = '';
-
                     // Añade nuevas opciones
                     profesores.forEach(profesor => {
                         const option = document.createElement('option');

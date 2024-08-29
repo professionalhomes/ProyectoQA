@@ -1,7 +1,6 @@
 const { body, validationResult } = require('express-validator');
 const Cita = require('../models/Cita');
 const User = require('../models/User').default;
-
 // Asignar cita
 exports.asignarCita = [
     // Validaciones para los campos de la cita
@@ -39,7 +38,6 @@ exports.asignarCita = [
         }
     }
 ];
-
 // Obtener citas
 exports.obtenerCitas = async (req, res) => {
     try {

@@ -35,7 +35,6 @@
 
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
-
             try {
                 const response = await fetch('/register', {
                     method: 'POST',

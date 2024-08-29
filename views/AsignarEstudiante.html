@@ -1,36 +1,107 @@
-<!-- assignStudent.html -->
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asignar Estudiante a Curso</title>
+    <title>Crear Curso</title>
 </head>
+
 <body>
-    <h1>Asignar Estudiante a Curso</h1>
-    <form id="assignStudentForm">
-        <label for="estudiante_id">ID del Estudiante:</label>
-        <input type="text" id="estudiante_id" name="estudiante_id" required>
-        <br>
-        <label for="curso_id">ID del Curso:</label>
-        <input type="text" id="curso_id" name="curso_id" required>
-        <br>
-        <button type="submit">Asignar Estudiante</button>
+    <h1>Crear Curso</h1>
+    <form id="courseForm">
+        <div>
+            <label for="Curso_id">Curso:</label>
+            <select type="text" id="Curso_id" name="Curso_id" required>
+            </select>
+        </div>
+        <div>
+            <label for="estudiante_id">Estudiante:</label>
+            <select type="text" id="estudiante_id" name="estudiante_id" required>
+            </select>
+        </div>
+        <button type="submit">Crear</button>
     </form>
     <script>
-        document.getElementById('assignStudentForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const estudiante_id = document.getElementById('estudiante_id').value;
-            const curso_id = document.getElementById('curso_id').value;
-            const response = await fetch('/asignar-estudiante', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ estudiante_id, curso_id })
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM completamente cargado y parseado');
+            const profesorSelect = document.getElementById('Curso_id');
+            const estudianteSelect = document.getElementById('estudiante_id'); // Corrected the id
+            // Función para cargar cursos
+            async function loadCourses() {
+                try {
+                    const response = await fetch('/cursos'); // Cambia la ruta a la correcta si es necesario
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const cursos = await response.json();
+                    console.log('Cursos cargados:', cursos);
+                    // Limpia las opciones existentes
+                    profesorSelect.innerHTML = '';
+                    // Añade nuevas opciones
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo} (${curso.name}) (${curso.id})`;
+                        profesorSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los cursos:', error);
+                }
+            }
+            // Función para cargar estudiantes
+            async function loadEstudiante() {
+                try {
+                    const response = await fetch('/estudiantes'); // Cambia la ruta a la correcta si es necesario
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const estudiantes = await response.json();
+                    console.log('Estudiantes cargados:', estudiantes);
+                    // Limpia las opciones existentes
+                    estudianteSelect.innerHTML = ''; // Now clearing estudianteSelect
+                    // Añade nuevas opciones
+                    estudiantes.forEach(estudiante => {
+                        console.log('Estudiante:', estudiante); // Verifica que el curso tiene los datos esperados
+                        const option = document.createElement('option');
+                        option.value = estudiante.id;
+                        option.textContent = `${estudiante.nombre} (${estudiante.carnet})`; // 
+                        estudianteSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los estudiantes:', error);
+                }
+            }
+            loadCourses();
+            loadEstudiante();
+            document.querySelector('#courseForm').addEventListener('submit', async function (event) {
+                event.preventDefault(); // Prevents the traditional form submission
+                const formData = new FormData(event.target);
+                const data = Object.fromEntries(formData.entries());
+                try {
+                    const response = await fetch('/qwerty', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json(); // Parse the JSON response
+                    if (!response.ok) {
+                        if (result.errors) {
+                            result.errors.forEach(error => {
+                                alert(error.msg); // Display each error in an alert
+                            });
+                        } else {
+                            alert(result.error || 'Error al registrar');
+                        }
+                    } else {
+                        alert('Registro exitoso');
+                        event.target.reset(); // Reset the form after successful submission
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error al registrar');
+                }
             });
-            const result = await response.json();
-            alert(result.message || result.error);
         });
     </script>
 </body>

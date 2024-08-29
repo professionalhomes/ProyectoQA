@@ -1,6 +1,8 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 const User = require('./User');
+const Curso = require('./Curso');
+const CursoEstudiante = require('./CursoEstudiante');
 
 const Estudiante = sequelize.define('Estudiante', {
     id: {
@@ -27,8 +29,9 @@ const Estudiante = sequelize.define('Estudiante', {
         allowNull: false
     }
 }, {
-    tableName: 'Estudiantes', 
-    timestamps: true
+    
+    timestamps: true,
+    tableName: 'Estudiantes'
 });
 
 

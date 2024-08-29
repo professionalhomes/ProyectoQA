@@ -29,7 +29,5 @@ const Profesor = sequelize.define('Profesor', {
 }, {
     timestamps: true
 });
-
 Profesor.belongsTo(User, { foreignKey: 'user_id' });
-
 module.exports = Profesor;
