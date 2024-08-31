@@ -37,11 +37,11 @@ app.use((req, res, next) => {
 // Configurar Passport
 require('./config/passport')(passport);
 // Sincronizar los modelos con la base de datos
-sequelize.sync({ force: true }).then(() => {
-    console.log("All models were synchronized successfully.");
-}).catch(error => {
-    console.error("Error synchronizing models:", error);
-});
+//sequelize.sync({ force: true }).then(() => {
+ //   console.log("All models were synchronized successfully.");
+//}).catch(error => {
+  //  console.error("Error synchronizing models:", error);
+//});
 // Registrar rutas
 app.use('/', Routes);
 // Ruta principal

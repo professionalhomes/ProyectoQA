@@ -79,7 +79,7 @@
                 const formData = new FormData(event.target);
                 const data = Object.fromEntries(formData.entries());
                 try {
-                    const response = await fetch('/qwerty', {
+                    const response = await fetch('/asignar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)

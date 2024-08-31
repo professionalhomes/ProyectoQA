@@ -23,8 +23,8 @@ exports.assignStudentsToCourse = async (req, res) => {
 
         // Crear la asociación
         const assignment = await CursoEstudiantes.create({
-            Curso_id: curso.id,
-            Estudiante_id:estudiante.id
+            Curso_id: cursoRecord.id,
+            Estudiante_id:estudianteRecord.id
         });
 
         res.status(201).json(assignment);

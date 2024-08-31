@@ -4,6 +4,7 @@ const authController = require('../controllers/authController'); // Aseg�rate 
 const cursosController = require('../controllers/cursosController');
 const EstudianteController = require('../controllers/estudianteController');
 const EstudiantecursoController = require('../controllers/CursoEstudianteController');
+const DisponibilidadController = require('../controllers/disponibilidadController');
 const router = express.Router();
 // P�gina de inicio de sesi�n
 router.get('/login', (req, res) => {
@@ -21,7 +22,7 @@ router.get('/dashboard', (req, res) => {
 });
 // Opciones del profesor
 router.get('/professor/availability', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'views', 'crear-cita.html'));
+    res.sendFile(path.join(__dirname, '..', 'views', 'crear-disponibilidad.html'));
 });
 router.get('/professor/appointments', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'ver-citas.html'));
@@ -52,7 +53,7 @@ router.get('/admin/reports', (req, res) => {
 });
 // API para obtener datos 
 router.get('/api/user-info', (req, res) => {
-    res.json({ name: req.user.nombre, role: req.user.role }); // Env�a datos JSON
+    res.json({ id:req.user.id ,name: req.user.nombre, role: req.user.role }); // Env�a datos JSON
 });
 // Procesar solicitudes POST
 router.post('/dashboard', authController.register);
@@ -62,5 +63,8 @@ router.get('/profesores', cursosController.getProfessors);
 router.get('/estudiantes', EstudianteController.getStudents);
 router.post('/register', authController.register);
 router.get('/logout', authController.logout);
-router.post('/qwerty', EstudiantecursoController.assignStudentsToCourse);
+router.post('/asignar', EstudiantecursoController.assignStudentsToCourse);
+router.get('/cursoprofesor', DisponibilidadController.getCursosPorProfesor);
+router.get('/Usuario', DisponibilidadController.getProfesorIdByUserId);
+router.post('/disponibilidad', DisponibilidadController.createDisponibilidad);
 module.exports = router;
