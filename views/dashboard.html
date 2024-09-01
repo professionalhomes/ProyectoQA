@@ -9,7 +9,6 @@
     <h1>Panel de Control</h1>
     <p>Bienvenido, <strong id="user-name"></strong></p>
     <p>Rol del Usuario: <span id="user-role"></span></p>
-
     <!-- Opciones basadas en el rol del usuario -->
     <div id="profesor-options" style="display: none;">
         <h2>Opciones de Profesor</h2>
@@ -19,7 +18,6 @@
             <li><a href="/professor/students">Consultar Solicitudes de Estudiantes</a></li>
         </ul>
     </div>
-
     <div id="estudiante-options" style="display: none;">
         <h2>Opciones de Estudiante</h2>
         <ul>
@@ -27,17 +25,15 @@
             <li><a href="/student/my-appointments">Ver Consultas Programadas</a></li>
         </ul>
     </div>
-
     <div id="administrador-options" style="display: none;">
         <h2>Opciones de Administrador</h2>
         <ul>
             <li><a href="/admin/courses">Gestionar Cursos</a></li>
-            <li><a href="/admin/professors">Gestionar Profesores</a></li>
+            <li><a href="/admin/estrella">Gestionar Estrellas</a></li>
             <li><a href="/admin/students">Gestionar Estudiantes</a></li>
             <li><a href="/admin/reports">Generar Reportes</a></li>
         </ul>
     </div>
-
     <script>
         // Hacer una solicitud para obtener datos del usuario
         fetch('/api/user-info')
@@ -59,7 +55,5 @@
             .catch(error => console.error('Error fetching user info:', error));
     </script>
     <a href="/logout">Cerrar Sesión</a>
-
-
 </body>
 </html>

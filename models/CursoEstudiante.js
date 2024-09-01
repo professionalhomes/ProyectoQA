@@ -2,8 +2,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
-const Curso = require('./Curso');
-const Estudiante = require('./Estudiante');
+
 
 const CursoEstudiante = sequelize.define('CursoEstudiante', {
     Curso_id: {
@@ -21,6 +20,10 @@ const CursoEstudiante = sequelize.define('CursoEstudiante', {
             key: 'id'
         },
         allowNull: false
+    },
+    vecesLlevado: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
     }
 }, {
     timestamps: true,

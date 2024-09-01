@@ -7,7 +7,6 @@
     <title>Crear Disponibilidad - TEC Consultas</title>
     <meta name="user-id" content="">
 </head>
-
 <body>
     <h1>Crear Disponibilidad</h1>
     <form id="create-disponibilidad-form">
@@ -72,7 +71,6 @@
                     if (!profesorResponse.ok) throw new Error('Error en la solicitud del profesor');
                     const profesorData = await profesorResponse.json();
                     console.log('Datos del profesor:', profesorData);
-
                     // Preparar los datos del formulario
                     const formData = {
                         profesorId: profesorData.profesorId,
@@ -83,7 +81,6 @@
                         cantidadCitas: document.getElementById('cantidadCitas').value
                     };
                     console.log('Datos del formulario:', formData);
-
                     // Enviar la solicitud para crear la disponibilidad
                     const response = await fetch('/disponibilidad', {
                         method: 'POST',
@@ -91,7 +88,6 @@
                         body: JSON.stringify(formData)
                     });
                     const result = await response.json();
-
                     // Manejar la respuesta
                     if (response.ok) {
                         alert('Disponibilidad creada exitosamente.');
@@ -105,5 +101,4 @@
         });
     </script>
 </body>
-
 </html>

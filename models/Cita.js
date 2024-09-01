@@ -1,27 +1,11 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
 const Cita = sequelize.define('Cita', {
     estudianteId: {
         type: DataTypes.INTEGER,
         references: {
-            model: 'Users',
-            key: 'id'
-        },
-        allowNull: false
-    },
-    profesorId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'Users',
-            key: 'id'
-        },
-        allowNull: false
-    },
-    cursoId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'Cursos',
+            model: 'Estudiantes',
             key: 'id'
         },
         allowNull: false
@@ -34,25 +18,20 @@ const Cita = sequelize.define('Cita', {
         },
         allowNull: false
     },
+    reservada: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     fecha: {
         type: DataTypes.DATE,
         allowNull: false
     },
-    horaInicio: {
-        type: DataTypes.TIME,
+    duracion: {
+        type: DataTypes.INTEGER, // Duración en minutos
         allowNull: false
-    },
-    horaFin: {
-        type: DataTypes.TIME,
-        allowNull: false
-    },
-    reservada: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
     }
 }, {
     tableName: 'citas',
     timestamps: false
 });
-
 module.exports = Cita;

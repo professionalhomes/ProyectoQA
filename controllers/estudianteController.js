@@ -1,5 +1,7 @@
+const User = require('../models/User');
 const Estudiante = require('../models/Estudiante');
-
+const CursoEstudiante = require('../models/CursoEstudiante');
+const Curso = require('../models/Curso');
 // Get all students
 exports.getStudents = async (req, res) => {
     try {
@@ -11,48 +13,58 @@ exports.getStudents = async (req, res) => {
     }
 };
 // Create a new student
-exports.createStudent = async (req, res) => {
-    const { carnet, nombre, user_id } = req.body;
+exports.updateEstrellas = async (req, res) => {
+    const { id, estrellas } = req.body; // Obtener id y estrellas del cuerpo de la solicitud
     try {
-        const student = await Estudiante.create({ carnet, nombre, user_id });
-        res.status(201).json(student);
+        // Validar que el id y las estrellas son válidos
+        if (!id || typeof estrellas !== 'number' || estrellas < 1 || estrellas > 3) {
+            return res.status(400).json({ error: 'Datos inválidos' });
+        }
+        // Encontrar al estudiante por ID
+        const estudiante = await Estudiante.findByPk(id);
+        if (!estudiante) {
+            return res.status(404).json({ error: 'Estudiante no encontrado' });
+        }
+        // Actualizar el campo estrellas
+        estudiante.estrellas = estrellas;
+        await estudiante.save();
+        res.status(200).json(estudiante); // Enviar el estudiante actualizado como respuesta
     } catch (error) {
-        console.error('Error creating student:', error);
-        res.status(500).json({ message: 'Error creating student' });
+        console.error('Error al actualizar estrellas:', error);
+        res.status(500).json({ error: 'Error al actualizar estrellas', message: error.message });
     }
 };
-// Update a student
-exports.updateStudent = async (req, res) => {
-    const { id } = req.params;
-    const { carnet, nombre, user_id } = req.body;
+exports.getCursosPorEstudiante = async (req, res) => {
+    const estudianteId = req.params.userId;
+    console.log('A:', estudianteId);
     try {
-        const student = await Estudiante.findByPk(id);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
+        const estudiante = await Estudiante.findOne({
+            where: { user_id: estudianteId }
+        });
+        if (!estudiante) {
+            return res.status(404).json({ error: 'Estudiante no encontrado'});
         }
-        student.carnet = carnet;
-        student.nombre = nombre;
-        student.user_id = user_id;
-        await student.save();
-        res.json(student);
-    } catch (error) {
-        console.error('Error updating student:', error);
-        res.status(500).json({ message: 'Error updating student' });
-    }
-};
-
-// Delete a student
-exports.deleteStudent = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const student = await Estudiante.findByPk(id);
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
+        console.log('B:', estudiante.id);
+        // Ahora, encuentra los cursos del estudiante a través de CursoEstudiante
+        const cursosEstudiantes = await CursoEstudiante.findAll({
+            where: { Estudiante_id: estudiante.id }
+        });
+        if (cursosEstudiantes.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron cursos para este estudiante' });
         }
-        await student.destroy();
-        res.status(204).json({ message: 'Student deleted successfully' });
+        // Devuelve los cursos asociados al estudiante
+        const cursoIds = cursosEstudiantes.map(cursoEstudiante => cursoEstudiante.Curso_id);
+        console.log('C:', cursoIds);
+        const cursos = await Curso.findAll({
+            where: { id: cursoIds }
+        });
+        if (cursos.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron cursos' });
+        }
+        // Devuelve los cursos del estudiante
+        res.status(200).json(cursos);
     } catch (error) {
-        console.error('Error deleting student:', error);
-        res.status(500).json({ message: 'Error deleting student' });
+        console.error('Error al obtener los cursos del estudiante:', error);
+        res.status(500).send('Error al obtener los cursos del estudiante');
     }
 };

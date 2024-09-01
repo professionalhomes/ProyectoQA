@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Cita - TEC Consultas</title>
+</head>
+
+<body>
+    <h1>Solicitar Cita</h1>
+    <form id="asignarCitaForm">
+        <label for="cursoId">Curso:</label>
+        <select id="cursoId" name="cursoId" required>
+            <!-- Opciones de cursos serán cargadas aquí -->
+        </select>
+        <button type="submit">Solicitar Cita</button>
+    </form>
+    <a href="/dashboard">Volver al dashboard</a>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            console.log('DOM completamente cargado y parseado');
+            const CursoSelect = document.getElementById('cursoId');
+
+            async function loadCourses() {
+                try {
+                    // Obtén la información del usuario
+                    const userResponse = await fetch('/api/user-info');
+                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                    const userData = await userResponse.json();
+                    console.log('Datos del usuario:', userData);
+
+                    // Obtén los cursos del estudiante
+                    const cursosResponse = await fetch(`/cursoestudiante/${userData.id}`);
+                    if (!cursosResponse.ok) throw new Error('Error en la solicitud de cursos');
+                    const cursos = await cursosResponse.json();
+                    console.log('Cursos encontrados:', cursos);
+                    // Llena el <select> con las opciones de cursos
+                    CursoSelect.innerHTML = '';
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo} - ${curso.name} (${curso.id})`;
+                        CursoSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar datos:', error);
+                    document.getElementById('result').innerText = 'Error al cargar datos: ' + error.message;
+                }
+            }
+            
+            loadCourses();
+            document.querySelector('#asignarCitaForm').addEventListener('submit', async (e) => {
+                e.preventDefault(); // Prevenir el envío del formulario por defecto
+
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/asignarCita', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        if (result.errors) {
+                            result.errors.forEach(error => {
+                                alert(error.msg); // Mostrar cada error en una alerta
+                            });
+                        } else {
+                            alert(result.error || 'Error al asignar cita'); // Mostrar error general
+                        }
+                    } else {
+                        alert('Cita  exitosamente');
+                        window.location.href = '/dashboard'; // Redirigir al dashboard
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error al asignar cita');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

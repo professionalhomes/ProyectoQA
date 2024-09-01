@@ -22,7 +22,7 @@ router.get('/dashboard', (req, res) => {
 });
 // Opciones del profesor
 router.get('/professor/availability', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'views', 'crear-disponibilidad.html'));
+    res.sendFile(path.join(__dirname, '..', 'views', 'CrearDisponibilidad.html'));
 });
 router.get('/professor/appointments', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'ver-citas.html'));
@@ -32,14 +32,14 @@ router.get('/professor/students', (req, res) => {
 });
 // Opciones del estudiante
 router.get('/student/appointments', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'views', 'solicitar-cita.html'));
+    res.sendFile(path.join(__dirname, '..', 'views', 'SolicitarCita.html'));
 });
 // Opciones del administrador
 router.get('/admin/courses', async (req, res) => {
-        res.sendFile(path.join(__dirname, '..', 'views', 'GestiónCursos.html'));
+    res.sendFile(path.join(__dirname, '..', 'views', 'GestiónCursos.html'));
 });
-router.get('/admin/professors', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'views', 'asignar-profesor.html'));
+router.get('/admin/estrella', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'views', 'GestionEstrellas.html'));
 });
 router.get('/admin/students', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'AsignarEstudiante.html'));
@@ -53,7 +53,7 @@ router.get('/admin/reports', (req, res) => {
 });
 // API para obtener datos 
 router.get('/api/user-info', (req, res) => {
-    res.json({ id:req.user.id ,name: req.user.nombre, role: req.user.role }); // Env�a datos JSON
+    res.json({ id: req.user.id, name: req.user.nombre, role: req.user.role }); // Env�a datos JSON
 });
 // Procesar solicitudes POST
 router.post('/dashboard', authController.register);
@@ -65,6 +65,8 @@ router.post('/register', authController.register);
 router.get('/logout', authController.logout);
 router.post('/asignar', EstudiantecursoController.assignStudentsToCourse);
 router.get('/cursoprofesor', DisponibilidadController.getCursosPorProfesor);
+router.get('/cursoestudiante/:userId', EstudianteController.getCursosPorEstudiante);
 router.get('/Usuario', DisponibilidadController.getProfesorIdByUserId);
 router.post('/disponibilidad', DisponibilidadController.createDisponibilidad);
+router.post('/cambiarestrella', EstudianteController.updateEstrellas);
 module.exports = router;
