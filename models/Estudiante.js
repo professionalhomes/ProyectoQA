@@ -1,6 +1,9 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 const User = require('./User');
+const CursoEstudiante = require('./CursoEstudiante');
+const Curso = require('./Curso');
+
 const Estudiante = sequelize.define('Estudiante', {
     id: {
         type: DataTypes.INTEGER,
@@ -38,4 +41,6 @@ const Estudiante = sequelize.define('Estudiante', {
     timestamps: true,
     tableName: 'Estudiantes'
 });
+
+
 module.exports = Estudiante;

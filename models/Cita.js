@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
+const Disponibilidades = require('./Disponibilidad'); 
 
 const Cita = sequelize.define('Cita', {
     estudianteId: {
@@ -13,7 +14,7 @@ const Cita = sequelize.define('Cita', {
     disponibilidadId: {
         type: DataTypes.INTEGER,
         references: {
-            model: 'Disponibilidades',
+            model: Disponibilidades,
             key: 'id'
         },
         allowNull: false
@@ -26,6 +27,11 @@ const Cita = sequelize.define('Cita', {
         type: DataTypes.DATE,
         allowNull: false
     },
+    prioridad: {
+        type: DataTypes.INTEGER, 
+        defaultValue: 0,
+        allowNull: false
+    },
     duracion: {
         type: DataTypes.INTEGER, // Duración en minutos
         allowNull: false
@@ -34,4 +40,5 @@ const Cita = sequelize.define('Cita', {
     tableName: 'citas',
     timestamps: false
 });
+
 module.exports = Cita;

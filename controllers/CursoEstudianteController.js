@@ -1,4 +1,4 @@
-const Curso = require('../models/Curso'); // Asegúrate de que la ruta sea correcta
+const Curso = require('../models/Curso'); 
 const Estudiante = require('../models/Estudiante');
 const CursoEstudiantes = require('../models/CursoEstudiante');
 

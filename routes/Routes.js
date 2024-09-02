@@ -1,60 +1,69 @@
 const express = require('express');
 const path = require('path');
-const authController = require('../controllers/authController'); // Aseg�rate de que esta ruta sea correcta
+const authController = require('../controllers/authController');
 const cursosController = require('../controllers/cursosController');
 const EstudianteController = require('../controllers/estudianteController');
 const EstudiantecursoController = require('../controllers/CursoEstudianteController');
 const DisponibilidadController = require('../controllers/disponibilidadController');
+const solicitarCitaController = require('../controllers/citasController');
 const router = express.Router();
-// P�gina de inicio de sesi�n
+
+// Páginas
 router.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'login.html'));
 });
-// Procesar inicio de sesi�n
-router.post('/login', authController.login); // Aseg�rate de que authController.login est� definido
-// P�gina de registro
+
+router.post('/login', authController.login);
+
 router.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'register.html'));
 });
-// P�gina de Dashboard
+
 router.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'dashboard.html'));
 });
-// Opciones del profesor
+
 router.get('/professor/availability', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'CrearDisponibilidad.html'));
 });
+
 router.get('/professor/appointments', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'ver-citas.html'));
 });
+
 router.get('/professor/students', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'views', 'ver-estudiantes.html'));
+    res.sendFile(path.join(__dirname, '..', 'views', 'Solicitudes.html'));
 });
-// Opciones del estudiante
+
 router.get('/student/appointments', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'SolicitarCita.html'));
 });
-// Opciones del administrador
+
 router.get('/admin/courses', async (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'GestiónCursos.html'));
 });
+
 router.get('/admin/estrella', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'GestionEstrellas.html'));
 });
+
 router.get('/admin/students', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'AsignarEstudiante.html'));
 });
+
 router.get('/admin/settings', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'admin-settings.html'));
-});  // <-- Aqu� estaba el par�ntesis faltante
+});
 
 router.get('/admin/reports', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'admin-reports.html'));
 });
-// API para obtener datos 
+
+// API para obtener datos
 router.get('/api/user-info', (req, res) => {
-    res.json({ id: req.user.id, name: req.user.nombre, role: req.user.role }); // Env�a datos JSON
+    res.json({ id: req.user.id, name: req.user.nombre, role: req.user.role });
 });
+
 // Procesar solicitudes POST
 router.post('/dashboard', authController.register);
 router.post('/crear-curso', cursosController.createCourse);
@@ -69,4 +78,6 @@ router.get('/cursoestudiante/:userId', EstudianteController.getCursosPorEstudian
 router.get('/Usuario', DisponibilidadController.getProfesorIdByUserId);
 router.post('/disponibilidad', DisponibilidadController.createDisponibilidad);
 router.post('/cambiarestrella', EstudianteController.updateEstrellas);
+router.post('/solicitar-cita', solicitarCitaController.solicitarCita);
+
 module.exports = router;

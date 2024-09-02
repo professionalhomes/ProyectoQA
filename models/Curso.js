@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
-const Profesor = require('./Profesor');
-const Estudiante = require('./Estudiante'); // Import Estudiante
-const CursoEstudiante = require('./CursoEstudiante'); // Import CursoEstudiante
+const Profesor = require('./Profesor'); // Import Estudiante
+const CursoEstudiante = require('./CursoEstudiante'); // Import CursoEstudianteconst CursoEstudiante = require('./CursoEstudiante');
+const Estudiante = require('./Estudiante');
 
 const Curso = sequelize.define('Curso', {
     id: {

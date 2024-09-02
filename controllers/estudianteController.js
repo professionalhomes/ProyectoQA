@@ -1,11 +1,12 @@
-const User = require('../models/User');
+
 const Estudiante = require('../models/Estudiante');
 const CursoEstudiante = require('../models/CursoEstudiante');
 const Curso = require('../models/Curso');
-// Get all students
+
 exports.getStudents = async (req, res) => {
     try {
         const students = await Estudiante.findAll();
+        console.log('A:', students);
         res.json(students);
     } catch (error) {
         console.error('Error fetching students:', error);

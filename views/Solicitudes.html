@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitudes de Cita</title>
+</head>
+<body>
+    <h1>Solicitudes de Cita</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID de Cita</th>
+                <th>Nombre del Estudiante</th>
+                <th>Carnet del Estudiante</th>
+                <th>Fecha</th>
+                <th>Duración</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% citas.forEach(cita => { %>
+                <tr>
+                    <td><%= cita.id %></td>
+                    <td><%= cita.estudiante.nombre %></td>
+                    <td><%= cita.estudiante.carnet %></td>
+                    <td><%= cita.fecha %></td>
+                    <td><%= cita.duracion %> minutos</td>
+                    <td>
+                        <form action="/citas/<%= cita.id %>/aceptar" method="POST" style="display:inline;">
+                            <button type="submit">Aceptar</button>
+                        </form>
+                        <form action="/citas/<%= cita.id %>/rechazar" method="POST" style="display:inline;">
+                            <button type="submit">Rechazar</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</body>
+</html>

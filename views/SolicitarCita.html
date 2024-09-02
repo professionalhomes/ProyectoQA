@@ -1,46 +1,45 @@
+<!-- views/SolicitarCita.html -->
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitar Cita - TEC Consultas</title>
+    <title>Solicitar Cita</title>
 </head>
 
 <body>
     <h1>Solicitar Cita</h1>
-    <form id="asignarCitaForm">
-        <label for="cursoId">Curso:</label>
+    <form id="solicitarCitaForm">
+
+        <label for="cursoId">Seleccionar Curso:</label>
         <select id="cursoId" name="cursoId" required>
-            <!-- Opciones de cursos serán cargadas aquí -->
+            <!-- Opciones de cursos cargadas dinámicamente -->
         </select>
+
         <button type="submit">Solicitar Cita</button>
     </form>
-    <a href="/dashboard">Volver al dashboard</a>
+
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('DOM completamente cargado y parseado');
             const CursoSelect = document.getElementById('cursoId');
-
             async function loadCourses() {
                 try {
-                    // Obtén la información del usuario
+                    
                     const userResponse = await fetch('/api/user-info');
                     if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
                     const userData = await userResponse.json();
                     console.log('Datos del usuario:', userData);
-
-                    // Obtén los cursos del estudiante
                     const cursosResponse = await fetch(`/cursoestudiante/${userData.id}`);
                     if (!cursosResponse.ok) throw new Error('Error en la solicitud de cursos');
                     const cursos = await cursosResponse.json();
                     console.log('Cursos encontrados:', cursos);
-                    // Llena el <select> con las opciones de cursos
                     CursoSelect.innerHTML = '';
                     cursos.forEach(curso => {
                         const option = document.createElement('option');
                         option.value = curso.id;
-                        option.textContent = `${curso.codigo} - ${curso.name} (${curso.id})`;
+                        option.textContent = `${curso.codigo}-${curso.name}(${curso.id})`;
                         CursoSelect.appendChild(option);
                     });
                 } catch (error) {
@@ -48,38 +47,31 @@
                     document.getElementById('result').innerText = 'Error al cargar datos: ' + error.message;
                 }
             }
-            
             loadCourses();
-            document.querySelector('#asignarCitaForm').addEventListener('submit', async (e) => {
-                e.preventDefault(); // Prevenir el envío del formulario por defecto
-
-                const formData = new FormData(e.target);
+            document.getElementById('solicitarCitaForm').addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevents the traditional form submission
+                const formData = new FormData(event.target);
                 const data = Object.fromEntries(formData.entries());
-
+                const userResponse = await fetch('/api/user-info');
+                if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                const userData = await userResponse.json();
                 try {
-                    const response = await fetch('/asignarCita', {
+                    const response = await fetch('/solicitar-cita', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ userData, data }),
                     });
-
                     const result = await response.json();
-
-                    if (!response.ok) {
-                        if (result.errors) {
-                            result.errors.forEach(error => {
-                                alert(error.msg); // Mostrar cada error en una alerta
-                            });
-                        } else {
-                            alert(result.error || 'Error al asignar cita'); // Mostrar error general
-                        }
+                    if (response.ok) {
+                        console.log('Citas disponibles:', result.citas);
+                        // Mostrar citas disponibles al usuario
                     } else {
-                        alert('Cita  exitosamente');
-                        window.location.href = '/dashboard'; // Redirigir al dashboard
+                        console.error('Error:', result.error);
                     }
                 } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error al asignar cita');
+                    console.error('Error al solicitar cita:', error);
                 }
             });
         });

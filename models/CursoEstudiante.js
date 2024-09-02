@@ -22,8 +22,8 @@ const CursoEstudiante = sequelize.define('CursoEstudiante', {
         allowNull: false
     },
     vecesLlevado: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
+        type: DataTypes.INTEGER,
+        defaultValue: 0
     }
 }, {
     timestamps: true,
