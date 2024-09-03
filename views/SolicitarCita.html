@@ -19,14 +19,13 @@
 
         <button type="submit">Solicitar Cita</button>
     </form>
-
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('DOM completamente cargado y parseado');
             const CursoSelect = document.getElementById('cursoId');
             async function loadCourses() {
                 try {
-                    
+
                     const userResponse = await fetch('/api/user-info');
                     if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
                     const userData = await userResponse.json();

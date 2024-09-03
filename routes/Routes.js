@@ -65,6 +65,9 @@ router.get('/api/user-info', (req, res) => {
 });
 
 // Procesar solicitudes POST
+router.post('/Solicitar', solicitarCitaController.obtenerCitasDelProfesor);
+router.post('/citas/:id/aceptar', solicitarCitaController.aceptarCita);
+router.post('/citas/:id/rechazar', solicitarCitaController.rechazarCita);
 router.post('/dashboard', authController.register);
 router.post('/crear-curso', cursosController.createCourse);
 router.get('/cursos', cursosController.getCourses);

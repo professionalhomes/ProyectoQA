@@ -40,7 +40,8 @@ const Disponibilidad = sequelize.define('Disponibilidad', {
     cantidadCitas: {
         type: DataTypes.INTEGER,
         allowNull: false
-    }
+    },   
+
 }, {
     tableName: 'disponibilidades',
     timestamps: false

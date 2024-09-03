@@ -9,7 +9,8 @@ const Cita = sequelize.define('Cita', {
             model: 'Estudiantes',
             key: 'id'
         },
-        allowNull: false
+        allowNull: false,
+        onDelete: 'CASCADE', // Elimina la cita si se elimina el estudiante
     },
     disponibilidadId: {
         type: DataTypes.INTEGER,
@@ -17,7 +18,8 @@ const Cita = sequelize.define('Cita', {
             model: Disponibilidades,
             key: 'id'
         },
-        allowNull: false
+        allowNull: false,
+        onDelete: 'CASCADE', // Elimina la cita si se elimina el estudiante
     },
     reservada: {
         type: DataTypes.BOOLEAN,
@@ -35,10 +37,17 @@ const Cita = sequelize.define('Cita', {
     duracion: {
         type: DataTypes.INTEGER, // Duración en minutos
         allowNull: false
-    }
+    },
+    estado: {
+        type: DataTypes.ENUM('pendiente', 'aceptada', 'rechazada'),
+        allowNull: false,
+        defaultValue: 'pendiente',
+        comment: 'Estado de la cita',
+    },
 }, {
     tableName: 'citas',
-    timestamps: false
+    timestamps: true, // Incluye createdAt y updatedAt automáticamente
+    paranoid: true, // Incluye deletedAt para borrado suave
 });
 
 module.exports = Cita;
