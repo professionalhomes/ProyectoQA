@@ -39,6 +39,10 @@ router.get('/student/appointments', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'SolicitarCita.html'));
 });
 
+router.get('/student/my-appointments', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'views', 'SolicitudesEstudiantes.html'));
+});
+
 router.get('/admin/courses', async (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'GestiónCursos.html'));
 });
@@ -66,6 +70,7 @@ router.get('/api/user-info', (req, res) => {
 
 // Procesar solicitudes POST
 router.post('/Solicitar', solicitarCitaController.obtenerCitasDelProfesor);
+router.post('/citasestudiante', solicitarCitaController.obtenerCitasDelEstudiante);
 router.post('/citas/:id/aceptar', solicitarCitaController.aceptarCita);
 router.post('/citas/:id/rechazar', solicitarCitaController.rechazarCita);
 router.post('/dashboard', authController.register);

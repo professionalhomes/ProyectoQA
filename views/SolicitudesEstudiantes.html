@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitudes de Cita</title>
+</head>
+
+<body>
+    <h1>Solicitudes de Cita</h1>
+
+    <form id="solicitarCitaForm">
+        <label for="cursoId">Seleccionar Curso:</label>
+        <select id="cursoId" name="cursoId" required>
+            <!-- Opciones de cursos cargadas dinámicamente -->
+        </select>
+
+        <button type="submit" id="searchBtn">Buscar Citas</button>
+    </form>
+
+    <table id="citasTable">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Estado</th>
+            
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Las filas de la tabla se llenarán dinámicamente -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            console.log('DOM completamente cargado y parseado');
+            const cursoSelect = document.getElementById('cursoId'); // Corrección en la referencia al ID
+            const citasTable = document.getElementById('citasTable').getElementsByTagName('tbody')[0];
+
+            async function loadCourses() {
+                try {
+                    const userResponse = await fetch('/api/user-info');
+                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                    const userData = await userResponse.json();
+                    console.log('Datos del usuario:', userData);
+
+                    const cursosResponse = await fetch(`/cursoestudiante/${userData.id}`);
+                    if (!cursosResponse.ok) throw new Error('Error en la solicitud de cursos');
+                    const cursos = await cursosResponse.json();
+                    console.log('Cursos encontrados:', cursos);
+
+                    cursoSelect.innerHTML = '';
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo}-${curso.name} (${curso.id})`;
+                        cursoSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar datos:', error);
+                    alert('Error al cargar datos: ' + error.message);
+                }
+            }
+
+            loadCourses(); // Se llama a la función para cargar los cursos cuando se carga la página
+
+            document.getElementById('solicitarCitaForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                try {
+                    const userResponse = await fetch('/api/user-info');
+                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                    const userData = await userResponse.json();
+                    console.log('Datos del usuario:', userData);
+
+                    const cursoId = cursoSelect.value;
+                    if (!cursoId) {
+                        alert('Por favor, selecciona un curso.');
+                        return;
+                    }
+
+                    const response = await fetch('/citasestudiante', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ cursoId, userData }),
+                    });
+
+                    if (!response.ok) throw new Error('Error en la solicitud de citas');
+
+                    const result = await response.json();
+                    const citas = result.citas; // Extraer el arreglo de citas
+
+                    citasTable.innerHTML = ''; // Limpiar la tabla antes de llenarla
+                    citas.forEach(cita => {
+                        const fecha = new Date(cita.fecha);
+                        const fechaFormateada = fecha.toLocaleString('es-ES', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: 'numeric',
+                            hour12: true,
+                        });
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                <td>${fechaFormateada}</td>
+                <td>${cita.estado}</td>
+                <td>${cita.prioridad}</td>
+            `;
+                        citasTable.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar citas:', error);
+                    alert('Error al cargar citas: ' + error.message);
+                }
+            });
+
+        });
+    </script>
+</body>
+
+</html>
