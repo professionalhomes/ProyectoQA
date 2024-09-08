@@ -126,9 +126,5 @@ router.post('/disponibilidad', DisponibilidadController.createDisponibilidad);
 router.post('/cambiarestrella', EstudianteController.updateEstrellas);
 router.post('/solicitar-cita', solicitarCitaController.solicitarCita);
 router.post('/generar-reporte', reportController.generarReporte);
-<<<<<<< HEAD
-
-=======
->>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
 
 module.exports = router;
