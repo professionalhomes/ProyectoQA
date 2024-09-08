@@ -34,25 +34,54 @@
             <li><a href="/admin/reports">Generar Reportes</a></li>
         </ul>
     </div>
+    <div id="error-message" style="color: red; display: none;">Error al cargar la información del usuario. Por favor, inténtelo de nuevo más tarde.</div>
     <script>
+        // Función para mostrar el mensaje de error
+        function showError(message) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
         // Hacer una solicitud para obtener datos del usuario
         fetch('/api/user-info')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
             .then(data => {
+                // Validar que los datos esenciales están presentes
+                if (!data || !data.name || !data.role) {
+                    throw new Error('Datos del usuario incompletos');
+                }
+
+                // Mostrar el nombre y rol del usuario
                 document.getElementById('user-name').textContent = data.name;
                 document.getElementById('user-role').textContent = data.role;
+
                 // Mostrar opciones según el rol del usuario
-                if (data.role === 'profesor') {
-                    document.getElementById('profesor-options').style.display = 'block';
-                }
-                if (data.role === 'admin') {
-                    document.getElementById('administrador-options').style.display = 'block';
-                }
-                else if (data.role === 'estudiante') {
-                    document.getElementById('estudiante-options').style.display = 'block';
+                switch (data.role) {
+                    case 'profesor':
+                        document.getElementById('profesor-options').style.display = 'block';
+                        break;
+                    case 'admin':
+                        document.getElementById('administrador-options').style.display = 'block';
+                        break;
+                    case 'estudiante':
+                        document.getElementById('estudiante-options').style.display = 'block';
+                        break;
+                    default:
+                        // Mostrar mensaje si el rol no es reconocido
+                        showError('Rol no reconocido. Por favor, contacte al administrador.');
+                        break;
                 }
             })
-            .catch(error => console.error('Error fetching user info:', error));
+            .catch(error => {
+                console.error('Error fetching user info:', error);
+                showError('Error al cargar la información del usuario. Por favor, inténtelo de nuevo más tarde.');
+            });
     </script>
     <a href="/logout">Cerrar Sesión</a>
 </body>

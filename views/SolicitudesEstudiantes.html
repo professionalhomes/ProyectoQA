@@ -13,10 +13,11 @@
     <form id="solicitarCitaForm">
         <label for="cursoId">Seleccionar Curso:</label>
         <select id="cursoId" name="cursoId" required>
+            <option value="">Seleccione un curso</option>
             <!-- Opciones de cursos cargadas dinámicamente -->
         </select>
 
-        <button type="submit" id="searchBtn">Buscar Citas</button>
+        <button type="submit" id="searchBtn" disabled>Buscar Citas</button>
     </form>
 
     <table id="citasTable">
@@ -24,7 +25,6 @@
             <tr>
                 <th>Fecha y Hora</th>
                 <th>Estado</th>
-            
             </tr>
         </thead>
         <tbody>
@@ -32,12 +32,24 @@
         </tbody>
     </table>
 
+    <div class="feedback" style="color: red; display: none;">Error al cargar los datos. Por favor, inténtelo de nuevo.</div>
+
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('DOM completamente cargado y parseado');
-            const cursoSelect = document.getElementById('cursoId'); // Corrección en la referencia al ID
+            const cursoSelect = document.getElementById('cursoId');
             const citasTable = document.getElementById('citasTable').getElementsByTagName('tbody')[0];
+            const searchBtn = document.getElementById('searchBtn');
+            const feedback = document.querySelector('.feedback');
 
+            // Función para mostrar mensajes de error
+            function showError(message) {
+                feedback.textContent = message;
+                feedback.style.display = 'block';
+                searchBtn.disabled = true;
+            }
+
+            // Función para cargar cursos
             async function loadCourses() {
                 try {
                     const userResponse = await fetch('/api/user-info');
@@ -50,30 +62,29 @@
                     const cursos = await cursosResponse.json();
                     console.log('Cursos encontrados:', cursos);
 
-                    cursoSelect.innerHTML = '';
+                    cursoSelect.innerHTML = '<option value="">Seleccione un curso</option>';
                     cursos.forEach(curso => {
                         const option = document.createElement('option');
                         option.value = curso.id;
-                        option.textContent = `${curso.codigo}-${curso.name} (${curso.id})`;
+                        option.textContent = `${curso.codigo} - ${curso.name}`;
                         cursoSelect.appendChild(option);
                     });
+
+                    searchBtn.disabled = false;
                 } catch (error) {
                     console.error('Error al cargar datos:', error);
-                    alert('Error al cargar datos: ' + error.message);
+                    showError('Error al cargar los cursos. Por favor, inténtelo de nuevo.');
                 }
             }
 
             loadCourses(); // Se llama a la función para cargar los cursos cuando se carga la página
 
+            // Manejo del envío del formulario para buscar citas
             document.getElementById('solicitarCitaForm').addEventListener('submit', async (event) => {
                 event.preventDefault();
+                feedback.style.display = 'none'; // Ocultar mensajes de error previos
 
                 try {
-                    const userResponse = await fetch('/api/user-info');
-                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
-                    const userData = await userResponse.json();
-                    console.log('Datos del usuario:', userData);
-
                     const cursoId = cursoSelect.value;
                     if (!cursoId) {
                         alert('Por favor, selecciona un curso.');
@@ -85,16 +96,22 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ cursoId, userData }),
+                        body: JSON.stringify({ cursoId }),
                     });
 
                     if (!response.ok) throw new Error('Error en la solicitud de citas');
 
                     const result = await response.json();
-                    const citas = result.citas; // Extraer el arreglo de citas
+                    const citas = result.citas;
+
+                    if (!citas || citas.length === 0) {
+                        showError('No se encontraron citas para el curso seleccionado.');
+                        return;
+                    }
 
                     citasTable.innerHTML = ''; // Limpiar la tabla antes de llenarla
                     citas.forEach(cita => {
+                        // Formato de fecha y hora
                         const fecha = new Date(cita.fecha);
                         const fechaFormateada = fecha.toLocaleString('es-ES', {
                             weekday: 'long',
@@ -108,15 +125,14 @@
 
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                <td>${fechaFormateada}</td>
-                <td>${cita.estado}</td>
-                <td>${cita.prioridad}</td>
-            `;
+                            <td>${fechaFormateada}</td>
+                            <td>${cita.estado}</td>
+                        `;
                         citasTable.appendChild(row);
                     });
                 } catch (error) {
                     console.error('Error al cargar citas:', error);
-                    alert('Error al cargar citas: ' + error.message);
+                    showError('Error al cargar las citas. Por favor, inténtelo de nuevo.');
                 }
             });
 

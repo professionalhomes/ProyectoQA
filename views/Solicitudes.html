@@ -9,14 +9,13 @@
 
 <body>
     <h1>Solicitudes de Cita</h1>
-    
+
     <form id="solicitarCitaForm">
         <label for="cursoSelect">Seleccionar Curso:</label>
-        <select id="cursoSelect" name="cursoId">
-            <!-- Opciones de cursos cargadas dinámicamente -->
+        <select id="cursoSelect" name="cursoId" required>
+            <option value="">Seleccione un curso</option>
         </select>
-
-        <button type="submit" id="searchBtn">Buscar Citas</button>
+        <button type="submit" id="searchBtn" disabled>Buscar Citas</button>
     </form>
 
     <table id="citasTable">
@@ -33,6 +32,8 @@
         </tbody>
     </table>
 
+    <div class="feedback" style="color: red; display: none;">Error al cargar los datos. Por favor, inténtelo de nuevo.</div>
+
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('DOM completamente cargado y parseado');
@@ -40,7 +41,16 @@
             const cursoSelect = document.getElementById('cursoSelect');
             const searchBtn = document.getElementById('searchBtn');
             const citasTable = document.getElementById('citasTable').getElementsByTagName('tbody')[0];
+            const feedback = document.querySelector('.feedback');
 
+            // Función para mostrar mensajes de error
+            function showError(message) {
+                feedback.textContent = message;
+                feedback.style.display = 'block';
+                searchBtn.disabled = true;
+            }
+
+            // Función para cargar cursos
             async function loadCourses() {
                 try {
                     const userResponse = await fetch('/api/user-info');
@@ -52,21 +62,28 @@
                     if (!cursosResponse.ok) throw new Error('Error en la solicitud de cursos');
                     const cursos = await cursosResponse.json();
 
-                    cursoSelect.innerHTML = '';
+                    cursoSelect.innerHTML = '<option value="">Seleccione un curso</option>';
                     cursos.forEach(curso => {
                         const option = document.createElement('option');
                         option.value = curso.id;
-                        option.textContent = `${curso.codigo}-${curso.name}(${curso.id})`;
+                        option.textContent = `${curso.codigo} - ${curso.name}`;
                         cursoSelect.appendChild(option);
                     });
+
+                    searchBtn.disabled = false;
                 } catch (error) {
                     console.error('Error al cargar datos:', error);
+                    showError('Error al cargar los cursos. Por favor, inténtelo de nuevo.');
                 }
             }
+
             loadCourses();
 
+            // Manejo del envío del formulario para buscar citas
             document.getElementById('solicitarCitaForm').addEventListener('submit', async (event) => {
                 event.preventDefault();
+                feedback.style.display = 'none'; // Ocultar mensajes de error previos
+
                 try {
                     const cursoId = cursoSelect.value;
                     if (!cursoId) {
@@ -87,6 +104,11 @@
                     const citas = await response.json();
                     citasTable.innerHTML = ''; // Limpiar la tabla antes de llenarla
 
+                    if (citas.length === 0) {
+                        showError('No se encontraron citas para el curso seleccionado.');
+                        return;
+                    }
+
                     citas.forEach(cita => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -94,10 +116,10 @@
                             <td>${cita.estudiante.carnet}</td>
                             <td>${cita.prioridad}</td>
                             <td>
-                                <form action="/citas/${cita.id}/aceptar" method="POST" style="display:inline;">
+                                <form onsubmit="return confirm('¿Está seguro de aceptar esta cita?');" action="/citas/${cita.id}/aceptar" method="POST" style="display:inline;">
                                     <button type="submit">Aceptar</button>
                                 </form>
-                                <form action="/citas/${cita.id}/rechazar" method="POST" style="display:inline;">
+                                <form onsubmit="return confirm('¿Está seguro de rechazar esta cita?');" action="/citas/${cita.id}/rechazar" method="POST" style="display:inline;">
                                     <button type="submit" class="reject-btn">Rechazar</button>
                                 </form>
                             </td>
@@ -106,6 +128,7 @@
                     });
                 } catch (error) {
                     console.error('Error al cargar citas:', error);
+                    showError('Error al cargar las citas. Por favor, inténtelo de nuevo.');
                 }
             });
         });

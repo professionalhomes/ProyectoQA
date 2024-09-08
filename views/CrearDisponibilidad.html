@@ -7,11 +7,14 @@
     <title>Crear Disponibilidad - TEC Consultas</title>
     <meta name="user-id" content="">
 </head>
+
 <body>
     <h1>Crear Disponibilidad</h1>
     <form id="create-disponibilidad-form">
         <label for="cursoId">Curso:</label>
-        <select id="cursoId" name="cursoId" required></select><br><br>
+        <select id="cursoId" name="cursoId" required>
+            <option value="">Seleccione un curso</option>
+        </select><br><br>
         <label for="dia">Día:</label>
         <select id="dia" name="dia" required>
             <option value="lunes">Lunes</option>
@@ -27,14 +30,18 @@
         <label for="horaFin">Hora de Fin:</label>
         <input type="time" id="horaFin" name="horaFin" required><br><br>
         <label for="cantidadCitas">Cantidad de Citas:</label>
-        <input type="number" id="cantidadCitas" name="cantidadCitas" required><br><br>
-        <button type="submit">Crear Disponibilidad</button>
+        <input type="number" id="cantidadCitas" name="cantidadCitas" min="1" required><br><br>
+        <button type="submit" id="submitBtn" disabled>Crear Disponibilidad</button>
     </form>
     <div id="result"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('DOM completamente cargado y parseado');
-            const CursoSelect = document.getElementById('cursoId');
+            const cursoSelect = document.getElementById('cursoId');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Función para cargar cursos
             async function loadCourses() {
                 try {
                     const userResponse = await fetch('/api/user-info');
@@ -45,57 +52,78 @@
                     if (!cursosResponse.ok) throw new Error('Error en la solicitud de cursos');
                     const cursos = await cursosResponse.json();
                     console.log('Cursos encontrados:', cursos);
-                    CursoSelect.innerHTML = '';
+                    cursoSelect.innerHTML = '<option value="">Seleccione un curso</option>';
                     cursos.forEach(curso => {
                         const option = document.createElement('option');
                         option.value = curso.id;
                         option.textContent = `${curso.codigo}-${curso.name}(${curso.id})`;
-                        CursoSelect.appendChild(option);
+                        cursoSelect.appendChild(option);
                     });
+                    checkFormReady();
                 } catch (error) {
                     console.error('Error al cargar datos:', error);
                     document.getElementById('result').innerText = 'Error al cargar datos: ' + error.message;
+                    submitBtn.disabled = true;
                 }
             }
+
+            // Función para habilitar el botón de envío solo si hay cursos cargados
+            function checkFormReady() {
+                if (cursoSelect.options.length > 1) {
+                    submitBtn.disabled = false;
+                }
+            }
+
+            // Cargar los cursos al cargar la página
             loadCourses();
+
+            // Validación y manejo del envío del formulario
             document.querySelector('#create-disponibilidad-form').addEventListener('submit', async function (event) {
                 event.preventDefault();
+                const formData = {
+                    cursoId: document.getElementById('cursoId').value,
+                    dia: document.getElementById('dia').value,
+                    horaInicio: document.getElementById('horaInicio').value,
+                    horaFin: document.getElementById('horaFin').value,
+                    cantidadCitas: parseInt(document.getElementById('cantidadCitas').value, 10)
+                };
+
+                // Validaciones adicionales antes de enviar
+                if (!formData.cursoId) {
+                    alert('Debe seleccionar un curso.');
+                    return;
+                }
+
+                if (formData.horaFin <= formData.horaInicio) {
+                    alert('La hora de fin debe ser mayor que la hora de inicio.');
+                    return;
+                }
+
+                if (isNaN(formData.cantidadCitas) || formData.cantidadCitas <= 0) {
+                    alert('La cantidad de citas debe ser un número positivo.');
+                    return;
+                }
+
                 try {
-                    // Obtener la información del usuario
-                    const userResponse = await fetch('/api/user-info');
-                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
-                    const userData = await userResponse.json();
-                    console.log('Datos del usuario:', userData);
-                    // Obtener el ID del profesor usando el userId
-                    const profesorResponse = await fetch(`/Usuario?userId=${userData.id}`);
-                    if (!profesorResponse.ok) throw new Error('Error en la solicitud del profesor');
-                    const profesorData = await profesorResponse.json();
-                    console.log('Datos del profesor:', profesorData);
-                    // Preparar los datos del formulario
-                    const formData = {
-                        profesorId: profesorData.profesorId,
-                        cursoId: document.getElementById('cursoId').value,
-                        dia: document.getElementById('dia').value,
-                        horaInicio: document.getElementById('horaInicio').value,
-                        horaFin: document.getElementById('horaFin').value,
-                        cantidadCitas: document.getElementById('cantidadCitas').value
-                    };
-                    console.log('Datos del formulario:', formData);
-                    // Enviar la solicitud para crear la disponibilidad
                     const response = await fetch('/disponibilidad', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formData)
                     });
+
                     const result = await response.json();
-                    // Manejar la respuesta
+
                     if (response.ok) {
                         alert('Disponibilidad creada exitosamente.');
+                        event.target.reset();
+                        submitBtn.disabled = true;
+                        loadCourses();
                     } else {
-                        alert('Error al crear la disponibilidad: ' + result.error);
+                        alert('Error al crear la disponibilidad: ' + (result.error || 'Revise los datos ingresados.'));
                     }
                 } catch (error) {
-                    alert('Error al crear la disponibilidad: ' + result.error);
+                    console.error('Error al crear la disponibilidad:', error);
+                    alert('Error al crear la disponibilidad. Por favor, intente de nuevo.');
                 }
             });
         });

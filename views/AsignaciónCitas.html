@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,14 +10,18 @@
     <form id="formCita">
         <label for="cursoId">Curso:</label>
         <select id="cursoId" name="cursoId" required>
+            <option value="">Seleccione un curso</option>
             <!-- Opciones de cursos serán cargadas aquí -->
         </select>
-        <button type="submit">Solicitar Cita</button>
+        <button type="submit" id="submitBtn" disabled>Solicitar Cita</button>
     </form>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             console.log('DOM completamente cargado y parseado');
-            const Select = document.getElementById('cursoId');
+            const select = document.getElementById('cursoId');
+            const submitBtn = document.getElementById('submitBtn');
+
             // Función para cargar cursos
             async function loadCourses() {
                 try {
@@ -28,20 +31,36 @@
                     }
                     const cursos = await response.json();
                     console.log('Cursos cargados:', cursos);
-                    // Limpia las opciones existentes
-                    Select.innerHTML = '';
+                    select.innerHTML = '<option value="">Seleccione un curso</option>'; // Limpia y añade la opción predeterminada
                     // Añade nuevas opciones
                     cursos.forEach(curso => {
                         const option = document.createElement('option');
                         option.value = curso.id;
                         option.textContent = `${curso.codigo} (${curso.name}) (${curso.id})`;
-                        Select.appendChild(option);
+                        select.appendChild(option);
                     });
+
+                    // Habilita el botón de envío cuando las opciones están cargadas
+                    submitBtn.disabled = false;
+
                 } catch (error) {
                     console.error('Error al cargar los cursos:', error);
+                    alert('Error al cargar los cursos. Por favor, intente de nuevo más tarde.');
+                    submitBtn.disabled = true; // Deshabilita el botón de envío en caso de error
                 }
             }
+
+            // Cargar cursos al cargar la página
+            loadCourses();
+
+            // Validación adicional antes de enviar el formulario
+            document.getElementById('formCita').addEventListener('submit', function (event) {
+                if (select.value === "") {
+                    alert('Debe seleccionar un curso antes de solicitar una cita.');
+                    event.preventDefault();
+                }
+            });
+        });
     </script>
 </body>
-
 </html>
