@@ -1,0 +1,80 @@
+<!-- views/SolicitarCita.html -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Cita</title>
+</head>
+
+<body>
+    <h1>Solicitar Cita</h1>
+    <form id="solicitarCitaForm">
+
+        <label for="cursoId">Seleccionar Curso:</label>
+        <select id="cursoId" name="cursoId" required>
+            <!-- Opciones de cursos cargadas dinámicamente -->
+        </select>
+
+        <button type="submit">Solicitar Cita</button>
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            console.log('DOM completamente cargado y parseado');
+            const CursoSelect = document.getElementById('cursoId');
+            async function loadCourses() {
+                try {
+
+                    const userResponse = await fetch('/api/user-info');
+                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                    const userData = await userResponse.json();
+                    console.log('Datos del usuario:', userData);
+                    const cursosResponse = await fetch(`/cursoestudiante/${userData.id}`);
+                    if (!cursosResponse.ok) throw new Error('Error en la solicitud de cursos');
+                    const cursos = await cursosResponse.json();
+                    console.log('Cursos encontrados:', cursos);
+                    CursoSelect.innerHTML = '';
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo}-${curso.name}(${curso.id})`;
+                        CursoSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar datos:', error);
+                    document.getElementById('result').innerText = 'Error al cargar datos: ' + error.message;
+                }
+            }
+            loadCourses();
+            document.getElementById('solicitarCitaForm').addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevents the traditional form submission
+                const formData = new FormData(event.target);
+                const data = Object.fromEntries(formData.entries());
+                const userResponse = await fetch('/api/user-info');
+                if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                const userData = await userResponse.json();
+                try {
+                    const response = await fetch('/solicitar-cita', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ userData, data }),
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        console.log('Citas disponibles:', result.citas);
+                        // Mostrar citas disponibles al usuario
+                    } else {
+                        console.error('Error:', result.error);
+                    }
+                } catch (error) {
+                    console.error('Error al solicitar cita:', error);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

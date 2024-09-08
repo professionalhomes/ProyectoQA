@@ -69,9 +69,9 @@
 
         <fieldset>
             <legend>Reportes de Estudiantes</legend>
-            <label for="campus">Sede:</label>
-            <select id="campus" name="campus">
-                <option value="">Todas las Sedes</option>
+            <label for="estudiante">Estudiante:</label>
+            <select id="estudiante" name="estudiante">
+                <option value="">Todos los estudiantes</option>
             </select>
 
             <label for="student-id">Carnet:</label>
@@ -91,6 +91,85 @@
         <button type="button" onclick="generarReporte()">Generar Reporte</button>
     </form>
 </body>
+       <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM completamente cargado y parseado');
+            const cursoSelect = document.getElementById('course');
+            const estudianteSelect = document.getElementById('estudiante'); // Corrected the id
+            const profesorSelect = document.getElementById('professor');
+// Función para cargar cursos
+            async function loadCourses() {
+                try {
+                    const response = await fetch('/cursos'); // Cambia la ruta a la correcta si es necesario
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const cursos = await response.json();
+                    console.log('Cursos cargados:', cursos);
+                    // Limpia las opciones existentes
+                    cursoSelect.innerHTML = '';
+                    // Añade nuevas opciones
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo} (${curso.name}) (${curso.id})`;
+                        cursoSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los cursos:', error);
+                }
+            }
+            // Función para cargar estudiantes
+            async function loadEstudiante() {
+                try {
+                    const response = await fetch('/estudiantes'); 
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const estudiantes = await response.json();
+                    console.log('Estudiantes cargados:', estudiantes);
+                    // Limpia las opciones existentes
+                    estudianteSelect.innerHTML = ''; // Now clearing estudianteSelect
+                    // Añade nuevas opciones
+                    estudiantes.forEach(estudiante => {
+                        console.log('Estudiante:', estudiante); // Verifica que el curso tiene los datos esperados
+                        const option = document.createElement('option');
+                        option.value = estudiante.id;
+                        option.textContent = `${estudiante.nombre} (${estudiante.carnet})`; // 
+                        estudianteSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los estudiantes:', error);
+                }
+            }
+            
+            // Función para cargar profesores
+            async function loadProfessors() {
+                try {
+                    const response = await fetch('/profesores');
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const profesores = await response.json();
+                    console.log('Profesores cargados:', profesores);
+                    // Limpia las opciones existentes
+                    profesorSelect.innerHTML = '';
+                    // Añade nuevas opciones
+                    profesores.forEach(profesor => {
+                        const option = document.createElement('option');
+                        option.value = profesor.id; // Asegúrate de que este campo es correcto
+                        option.textContent = profesor.nombre;
+                        profesorSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los profesores:', error);
+                }
+            }
+            loadProfessors(); // Llama a la función para cargar los profesores
+            loadCourses();
+            loadEstudiante();
+       });
+       </script>
 </html>
 
 

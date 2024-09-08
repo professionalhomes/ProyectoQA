@@ -11,48 +11,28 @@
     <h1>Crear Curso</h1>
     <form id="courseForm">
         <div>
-            <label for="Curso_id">Curso:</label>
-            <select type="text" id="Curso_id" name="Curso_id" required>
+            <label for="estudiante_id">Estudiante:</label>
+            <select type="number" id="estudiante_id" name="estudiante_id" required>
             </select>
         </div>
         <div>
-            <label for="estudiante_id">Estudiante:</label>
-            <select type="text" id="estudiante_id" name="estudiante_id" required>
+            <label for="Estrella">Curso:</label>
+            <select type="number" id="Estrella" name="Estrella" required>
+                <option value=1>1</option>
+                <option value=2>2</option>
+                <option value=3>3</option>
             </select>
         </div>
-        <button type="submit">Crear</button>
+        <button type="submit">Actualizar</button>
     </form>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             console.log('DOM completamente cargado y parseado');
-            const profesorSelect = document.getElementById('Curso_id');
-            const estudianteSelect = document.getElementById('estudiante_id'); // Corrected the id
-            // Función para cargar cursos
-            async function loadCourses() {
-                try {
-                    const response = await fetch('/cursos'); // Cambia la ruta a la correcta si es necesario
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    const cursos = await response.json();
-                    console.log('Cursos cargados:', cursos);
-                    // Limpia las opciones existentes
-                    profesorSelect.innerHTML = '';
-                    // Añade nuevas opciones
-                    cursos.forEach(curso => {
-                        const option = document.createElement('option');
-                        option.value = curso.id;
-                        option.textContent = `${curso.codigo} (${curso.name}) (${curso.id})`;
-                        profesorSelect.appendChild(option);
-                    });
-                } catch (error) {
-                    console.error('Error al cargar los cursos:', error);
-                }
-            }
+            const estudianteSelect = document.getElementById('estudiante_id');
             // Función para cargar estudiantes
             async function loadEstudiante() {
                 try {
-                    const response = await fetch('/estudiantes'); 
+                    const response = await fetch('/estudiantes'); // Cambia la ruta a la correcta si es necesario
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
@@ -72,30 +52,35 @@
                     console.error('Error al cargar los estudiantes:', error);
                 }
             }
-            loadCourses();
             loadEstudiante();
             document.querySelector('#courseForm').addEventListener('submit', async function (event) {
-                event.preventDefault(); // Prevents the traditional form submission
+                event.preventDefault(); // Previene el envío tradicional del formulario
                 const formData = new FormData(event.target);
                 const data = Object.fromEntries(formData.entries());
+                const estudianteId = document.getElementById('estudiante_id').value;
+                const estrella = parseInt(document.getElementById('Estrella').value, 10); // Convertir a número
+                // Mostrar los valores en la consola
+                console.log('Estudiante ID:', estudianteId);
+                console.log('Estrella:', estrella);
+
                 try {
-                    const response = await fetch('/asignar', {
+                    const response = await fetch(`/cambiarestrella`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
+                        body: JSON.stringify({ id: estudianteId, estrellas: estrella }) // Enviar los datos correctos
                     });
-                    const result = await response.json(); // Parse the JSON response
+                    const result = await response.json(); // Parsear la respuesta JSON
                     if (!response.ok) {
                         if (result.errors) {
                             result.errors.forEach(error => {
-                                alert(error.msg); // Display each error in an alert
+                                alert(error.msg); // Mostrar cada error en una alerta
                             });
                         } else {
                             alert(result.error || 'Error al registrar');
                         }
                     } else {
-                        alert('Registro exitoso');
-                        event.target.reset(); // Reset the form after successful submission
+                        alert('Actualización exitosa');
+                        event.target.reset(); // Resetea el formulario tras una sumisión exitosa
                     }
                 } catch (error) {
                     console.error('Error:', error);
@@ -105,4 +90,5 @@
         });
     </script>
 </body>
+
 </html>

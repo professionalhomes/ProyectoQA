@@ -1,86 +1,71 @@
+
+const Estudiante = require('../models/Estudiante');
+const CursoEstudiante = require('../models/CursoEstudiante');
 const Curso = require('../models/Curso');
-const Cita = require('../models/Cita');
-const Disponibilidad = require('../models/Disponibilidad'); // Aseg˙rate de tener este modelo para manejar la disponibilidad de los profesores
 
-// Mostrar cursos y profesores disponibles
-exports.mostrarSeleccionarCurso = async (req, res) => {
+exports.getStudents = async (req, res) => {
     try {
-        const cursos = await Curso.findAll();
-        const profesores = await Profesor.findAll();
-        res.render('seleccionar-curso', { cursos, profesores });
+        const students = await Estudiante.findAll();
+        console.log('A:', students);
+        res.json(students);
     } catch (error) {
-        console.error('Error al mostrar cursos y profesores:', error);
-        res.status(500).send('Error al cargar datos');
+        console.error('Error fetching students:', error);
+        res.status(500).json({ message: 'Error fetching students' });
     }
 };
-
-// Solicitar cita
-exports.solicitarCita = async (req, res) => {
+// Create a new student
+exports.updateEstrellas = async (req, res) => {
+    const { id, estrellas } = req.body; // Obtener id y estrellas del cuerpo de la solicitud
     try {
-        const { cursoId, profesorId } = req.query;
-        const citas = await Cita.findAll({
-            where: { cursoId, profesorId },
-            include: [{ model: Profesor }, { model: Curso }]
-        });
-        res.render('ver-citas', { citas });
-    } catch (error) {
-        console.error('Error al solicitar cita:', error);
-        res.status(500).send('Error al solicitar cita');
-    }
-};
-
-// Mostrar citas del estudiante
-exports.mostrarMisCitas = async (req, res) => {
-    try {
-        const { carnet } = req.user; // Aseg˙rate de tener el carnet del estudiante en la sesiÛn
-        const estudiante = await Estudiante.findOne({ where: { carnet } });
-        const citas = await Cita.findAll({
-            where: { estudianteId: estudiante.id },
-            include: [{ model: Profesor }, { model: Curso }]
-        });
-        res.render('mis-citas', { citas });
-    } catch (error) {
-        console.error('Error al mostrar citas del estudiante:', error);
-        res.status(500).send('Error al mostrar citas');
-    }
-};
-
-// Solicitar una cita especÌfica
-exports.confirmarCita = async (req, res) => {
-    try {
-        const { citaId } = req.body;
-        const cita = await Cita.findByPk(citaId);
-
-        if (!cita) {
-            return res.status(404).send('Cita no encontrada');
+        // Validar que el id y las estrellas son v√°lidos
+        if (!id || typeof estrellas !== 'number' || estrellas < 1 || estrellas > 3) {
+            return res.status(400).json({ error: 'Datos inv√°lidos' });
         }
-
-        cita.estado = 'reservada'; // Cambia el estado de la cita a reservada
-        await cita.save();
-
-        res.redirect('/student/my-appointments'); // Redirigir al usuario a la p·gina de citas reservadas
+        // Encontrar al estudiante por ID
+        const estudiante = await Estudiante.findByPk(id);
+        if (!estudiante) {
+            return res.status(404).json({ error: 'Estudiante no encontrado' });
+        }
+        // Actualizar el campo estrellas
+        estudiante.estrellas = estrellas;
+        await estudiante.save();
+        res.status(200).json(estudiante); // Enviar el estudiante actualizado como respuesta
     } catch (error) {
-        console.error('Error al confirmar cita:', error);
-        res.status(500).send('Error al confirmar cita');
+        console.error('Error al actualizar estrellas:', error);
+        res.status(500).json({ error: 'Error al actualizar estrellas', message: error.message });
     }
 };
-
-// Cancelar una cita especÌfica
-exports.cancelarCita = async (req, res) => {
+exports.getCursosPorEstudiante = async (req, res) => {
+    const estudianteId = req.params.userId;
+    console.log('A:', estudianteId);
     try {
-        const { citaId } = req.body;
-        const cita = await Cita.findByPk(citaId);
-
-        if (!cita) {
-            return res.status(404).send('Cita no encontrada');
+        const estudiante = await Estudiante.findOne({
+            where: { user_id: estudianteId }
+        });
+        if (!estudiante) {
+            return res.status(404).json({ error: 'Estudiante no encontrado'});
         }
-
-        cita.estado = 'disponible'; // Cambia el estado de la cita a disponible
-        await cita.save();
-
-        res.redirect('/student/my-appointments'); // Redirigir al usuario a la p·gina de citas reservadas
+        console.log('B:', estudiante.id);
+        // Ahora, encuentra los cursos del estudiante a trav√©s de CursoEstudiante
+        const cursosEstudiantes = await CursoEstudiante.findAll({
+            where: { Estudiante_id: estudiante.id }
+        });
+        if (cursosEstudiantes.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron cursos para este estudiante' });
+        }
+        // Devuelve los cursos asociados al estudiante
+        const cursoIds = cursosEstudiantes.map(cursoEstudiante => cursoEstudiante.Curso_id);
+        console.log('C:', cursoIds);
+        const cursos = await Curso.findAll({
+            where: { id: cursoIds }
+        });
+        if (cursos.length === 0) {
+            return res.status(404).json({ error: 'No se encontraron cursos' });
+        }
+        // Devuelve los cursos del estudiante
+        res.status(200).json(cursos);
     } catch (error) {
-        console.error('Error al cancelar cita:', error);
-        res.status(500).send('Error al cancelar cita');
+        console.error('Error al obtener los cursos del estudiante:', error);
+        res.status(500).send('Error al obtener los cursos del estudiante');
     }
 };

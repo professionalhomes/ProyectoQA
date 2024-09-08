@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignación de Citas</title>
+</head>
+<body>
+    <h1>Asignación de Citas</h1>
+    <form id="formCita">
+        <label for="cursoId">Curso:</label>
+        <select id="cursoId" name="cursoId" required>
+            <!-- Opciones de cursos serán cargadas aquí -->
+        </select>
+        <button type="submit">Solicitar Cita</button>
+    </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM completamente cargado y parseado');
+            const Select = document.getElementById('cursoId');
+            // Función para cargar cursos
+            async function loadCourses() {
+                try {
+                    const response = await fetch('/cursos'); // Cambia la ruta a la correcta si es necesario
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const cursos = await response.json();
+                    console.log('Cursos cargados:', cursos);
+                    // Limpia las opciones existentes
+                    Select.innerHTML = '';
+                    // Añade nuevas opciones
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo} (${curso.name}) (${curso.id})`;
+                        Select.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los cursos:', error);
+                }
+            }
+    </script>
+</body>
+
+</html>

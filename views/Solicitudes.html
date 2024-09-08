@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitudes de Cita</title>
+</head>
+
+<body>
+    <h1>Solicitudes de Cita</h1>
+    
+    <form id="solicitarCitaForm">
+        <label for="cursoSelect">Seleccionar Curso:</label>
+        <select id="cursoSelect" name="cursoId">
+            <!-- Opciones de cursos cargadas dinámicamente -->
+        </select>
+
+        <button type="submit" id="searchBtn">Buscar Citas</button>
+    </form>
+
+    <table id="citasTable">
+        <thead>
+            <tr>
+                <th>Nombre del Estudiante</th>
+                <th>Carnet del Estudiante</th>
+                <th>Prioridad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Las filas de la tabla se llenarán dinámicamente -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            console.log('DOM completamente cargado y parseado');
+
+            const cursoSelect = document.getElementById('cursoSelect');
+            const searchBtn = document.getElementById('searchBtn');
+            const citasTable = document.getElementById('citasTable').getElementsByTagName('tbody')[0];
+
+            async function loadCourses() {
+                try {
+                    const userResponse = await fetch('/api/user-info');
+                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                    const userData = await userResponse.json();
+                    console.log('Datos del usuario:', userData);
+
+                    const cursosResponse = await fetch(`/cursoprofesor?userId=${userData.id}`);
+                    if (!cursosResponse.ok) throw new Error('Error en la solicitud de cursos');
+                    const cursos = await cursosResponse.json();
+
+                    cursoSelect.innerHTML = '';
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo}-${curso.name}(${curso.id})`;
+                        cursoSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar datos:', error);
+                }
+            }
+            loadCourses();
+
+            document.getElementById('solicitarCitaForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                try {
+                    const cursoId = cursoSelect.value;
+                    if (!cursoId) {
+                        alert('Por favor, selecciona un curso.');
+                        return;
+                    }
+
+                    const response = await fetch(`/Solicitar`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ cursoId }),
+                    });
+
+                    if (!response.ok) throw new Error('Error en la solicitud de citas');
+
+                    const citas = await response.json();
+                    citasTable.innerHTML = ''; // Limpiar la tabla antes de llenarla
+
+                    citas.forEach(cita => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${cita.estudiante.nombre}</td>
+                            <td>${cita.estudiante.carnet}</td>
+                            <td>${cita.prioridad}</td>
+                            <td>
+                                <form action="/citas/${cita.id}/aceptar" method="POST" style="display:inline;">
+                                    <button type="submit">Aceptar</button>
+                                </form>
+                                <form action="/citas/${cita.id}/rechazar" method="POST" style="display:inline;">
+                                    <button type="submit" class="reject-btn">Rechazar</button>
+                                </form>
+                            </td>
+                        `;
+                        citasTable.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar citas:', error);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

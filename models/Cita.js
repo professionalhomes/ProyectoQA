@@ -1,58 +1,53 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
+const Disponibilidades = require('./Disponibilidad'); 
 
 const Cita = sequelize.define('Cita', {
     estudianteId: {
         type: DataTypes.INTEGER,
         references: {
-            model: 'Users',
+            model: 'Estudiantes',
             key: 'id'
         },
-        allowNull: false
-    },
-    profesorId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'Users',
-            key: 'id'
-        },
-        allowNull: false
-    },
-    cursoId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'Cursos',
-            key: 'id'
-        },
-        allowNull: false
+        allowNull: false,
+        onDelete: 'CASCADE', // Elimina la cita si se elimina el estudiante
     },
     disponibilidadId: {
         type: DataTypes.INTEGER,
         references: {
-            model: 'Disponibilidades',
+            model: Disponibilidades,
             key: 'id'
         },
-        allowNull: false
+        allowNull: false,
+        onDelete: 'CASCADE', // Elimina la cita si se elimina el estudiante
+    },
+    reservada: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     },
     fecha: {
         type: DataTypes.DATE,
         allowNull: false
     },
-    horaInicio: {
-        type: DataTypes.TIME,
+    prioridad: {
+        type: DataTypes.INTEGER, 
+        defaultValue: 0,
         allowNull: false
     },
-    horaFin: {
-        type: DataTypes.TIME,
+    duracion: {
+        type: DataTypes.INTEGER, // Duración en minutos
         allowNull: false
     },
-    reservada: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
-    }
+    estado: {
+        type: DataTypes.ENUM('pendiente', 'aceptada', 'rechazada'),
+        allowNull: false,
+        defaultValue: 'pendiente',
+        comment: 'Estado de la cita',
+    },
 }, {
     tableName: 'citas',
-    timestamps: false
+    timestamps: true, // Incluye createdAt y updatedAt automáticamente
+    paranoid: true, // Incluye deletedAt para borrado suave
 });
 
 module.exports = Cita;
