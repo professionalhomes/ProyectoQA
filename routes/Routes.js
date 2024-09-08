@@ -6,6 +6,7 @@ const EstudianteController = require('../controllers/estudianteController');
 const EstudiantecursoController = require('../controllers/CursoEstudianteController');
 const DisponibilidadController = require('../controllers/disponibilidadController');
 const solicitarCitaController = require('../controllers/citasController');
+const reportController = require('../controllers/generarReporte');
 const router = express.Router();
 
 // Páginas
@@ -60,8 +61,9 @@ router.get('/admin/settings', (req, res) => {
 });
 
 router.get('/admin/reports', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'views', 'admin-reports.html'));
+    res.sendFile(path.join(__dirname, '..', 'views', 'reportesAdministrador.html'));
 });
+
 
 // API para obtener datos
 router.get('/api/user-info', (req, res) => {
@@ -87,5 +89,7 @@ router.get('/Usuario', DisponibilidadController.getProfesorIdByUserId);
 router.post('/disponibilidad', DisponibilidadController.createDisponibilidad);
 router.post('/cambiarestrella', EstudianteController.updateEstrellas);
 router.post('/solicitar-cita', solicitarCitaController.solicitarCita);
+router.post('/generar-reporte', reportController.generarReporte);
+
 
 module.exports = router;

@@ -27,6 +27,7 @@ const Profesor = sequelize.define('Profesor', {
         allowNull: false
     }
 }, {
+    tableName: 'profesores',
     timestamps: true
 });
 Profesor.belongsTo(User, { foreignKey: 'user_id' });
