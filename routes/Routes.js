@@ -70,6 +70,42 @@ router.get('/api/user-info', (req, res) => {
     res.json({ id: req.user.id, name: req.user.nombre, role: req.user.role });
 });
 
+////////////////////
+// Ruta para generar y descargar el reporte
+//router.get('/descargar-reporte',reportController.generarReporte);
+
+
+/////////////////////////////////////////////////////////////
+// Importar los modelos
+const { Curso, Profesor } = require('../models'); // Asegúrate de que las importaciones coincidan con tus nombres de archivos y exportaciones
+
+// Ruta para obtener cursos
+router.get('/api/cursos', async (req, res) => {
+    try {
+        const cursos = await Curso.findAll({
+            attributes: ['id', 'name'] // Asegúrate de que estos campos existen en tu modelo
+        });
+        res.json(cursos);
+    } catch (error) {
+        console.error('Error al obtener cursos:', error);
+        res.status(500).send(error);
+    }
+});
+
+// Ruta para obtener profesores
+router.get('/api/profesores', async (req, res) => {
+    try {
+        const profesores = await Profesor.findAll({
+            attributes: ['id', 'nombre'] // Asegúrate de que estos campos existen en tu modelo
+        });
+        res.json(profesores);
+    } catch (error) {
+        console.error('Error al obtener profesores:', error);
+        res.status(500).send(error);
+    }
+});
+///////////////////
+
 // Procesar solicitudes POST
 router.post('/Solicitar', solicitarCitaController.obtenerCitasDelProfesor);
 router.post('/citasestudiante', solicitarCitaController.obtenerCitasDelEstudiante);
@@ -90,6 +126,9 @@ router.post('/disponibilidad', DisponibilidadController.createDisponibilidad);
 router.post('/cambiarestrella', EstudianteController.updateEstrellas);
 router.post('/solicitar-cita', solicitarCitaController.solicitarCita);
 router.post('/generar-reporte', reportController.generarReporte);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
 
 module.exports = router;

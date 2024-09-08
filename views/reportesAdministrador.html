@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Reportes - TEC Consultas</title>
+<<<<<<< HEAD
     <style>
         .feedback {
             display: none;
@@ -103,6 +104,36 @@
             if (!response.ok) throw new Error('Error al generar el reporte');
 
             const blob = await response.blob();
+=======
+    <script>
+    window.onload = function() {
+        cargarDatos('/api/cursos', document.getElementById('course'), 'name');
+        cargarDatos('/api/profesores', document.getElementById('professor'), 'nombre');
+        cargarDatos('/api/sedes', document.getElementById('campus'), 'nombre'); // Asumiendo que tienes una API para sedes
+
+        function cargarDatos(url, selectElement, dataField) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(item => {
+                        const option = new Option(item[dataField], item.id);
+                        selectElement.add(option);
+                    });
+                })
+                .catch(error => console.error('Error al cargar datos:', error));
+        }
+    }
+
+    function generarReporte() {
+        var formData = new FormData(document.getElementById('reportForm'));
+
+        fetch('/generar-reporte', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.blob())
+        .then(blob => {
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';
@@ -111,6 +142,7 @@
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
+<<<<<<< HEAD
             loading.style.display = 'none'; // Hide loading spinner or message
         } catch (error) {
             console.error('Error al generar el reporte:', error);
@@ -118,26 +150,43 @@
             feedback.style.display = 'block';
             loading.style.display = 'none'; // Hide loading spinner or message
         }
+=======
+        })
+        .catch(error => console.error('Error al generar el reporte:', error));
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
     }
     </script>
 </head>
 <body>
     <h1>Sistema de Reportes de Consulta</h1>
+<<<<<<< HEAD
     <form id="reportForm" onsubmit="generarReporte(event)">
+=======
+    <form id="reportForm">
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
         <fieldset>
             <legend>Reportes de Cursos y Profesores</legend>
             <label for="course">Curso:</label>
             <select id="course" name="course">
+<<<<<<< HEAD
                 <option value="todos">Todos los Cursos</option>
+=======
+                <option value="">Todos los Cursos</option>
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
             </select>
 
             <label for="professor">Profesor:</label>
             <select id="professor" name="professor">
+<<<<<<< HEAD
                 <option value="todos">Todos los Profesores</option>
+=======
+                <option value="">Todos los Profesores</option>
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
             </select>
 
             <label for="day">Día:</label>
             <select id="day" name="day">
+<<<<<<< HEAD
                 <option value="todos">Toda la semana</option>
                 <option value="lunes">Lunes</option>
                 <option value="martes">Martes</option>
@@ -146,6 +195,10 @@
                 <option value="viernes">Viernes</option>
                 <option value="sábado">Sábado</option>
                 <option value="domingo">Domingo</option>
+=======
+                <option value="">Todos los Días</option>
+                <!-- Supongamos que quieres cargar dinámicamente los días también -->
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
             </select>
         </fieldset>
 
@@ -153,14 +206,23 @@
             <legend>Reportes de Estudiantes</legend>
             <label for="estudiante">Estudiante:</label>
             <select id="estudiante" name="estudiante">
+<<<<<<< HEAD
                 <option value="todos">Todos los Estudiantes</option>
             </select>
+=======
+                <option value="">Todos los estudiantes</option>
+            </select>
+
+            <label for="student-id">Carnet:</label>
+            <input type="text" id="student-id" name="student-id" placeholder="Ej. 2018489">
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
         </fieldset>
 
         <fieldset>
             <legend>Citas de Consulta Asignadas</legend>
             <label for="reserved">Tipo de Cita:</label>
             <select id="reserved" name="reserved">
+<<<<<<< HEAD
                 <option value="todos">Todos los Tipos</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="aceptada">Aceptada</option>
@@ -174,3 +236,97 @@
     <div class="loading">Generando reporte, por favor espere...</div>
 </body>
 </html>
+=======
+                <option value="">Todos los Tipos</option>
+                <option value="reserved">Reservada</option>
+                <option value="not-reserved">No Reservada</option>
+            </select>
+        </fieldset>
+
+        <button type="button" onclick="generarReporte()">Generar Reporte</button>
+    </form>
+</body>
+       <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM completamente cargado y parseado');
+            const cursoSelect = document.getElementById('course');
+            const estudianteSelect = document.getElementById('estudiante'); // Corrected the id
+            const profesorSelect = document.getElementById('professor');
+// Función para cargar cursos
+            async function loadCourses() {
+                try {
+                    const response = await fetch('/cursos'); // Cambia la ruta a la correcta si es necesario
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const cursos = await response.json();
+                    console.log('Cursos cargados:', cursos);
+                    // Limpia las opciones existentes
+                    cursoSelect.innerHTML = '';
+                    // Añade nuevas opciones
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo} (${curso.name}) (${curso.id})`;
+                        cursoSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los cursos:', error);
+                }
+            }
+            // Función para cargar estudiantes
+            async function loadEstudiante() {
+                try {
+                    const response = await fetch('/estudiantes'); 
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const estudiantes = await response.json();
+                    console.log('Estudiantes cargados:', estudiantes);
+                    // Limpia las opciones existentes
+                    estudianteSelect.innerHTML = ''; // Now clearing estudianteSelect
+                    // Añade nuevas opciones
+                    estudiantes.forEach(estudiante => {
+                        console.log('Estudiante:', estudiante); // Verifica que el curso tiene los datos esperados
+                        const option = document.createElement('option');
+                        option.value = estudiante.id;
+                        option.textContent = `${estudiante.nombre} (${estudiante.carnet})`; // 
+                        estudianteSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los estudiantes:', error);
+                }
+            }
+            
+            // Función para cargar profesores
+            async function loadProfessors() {
+                try {
+                    const response = await fetch('/profesores');
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const profesores = await response.json();
+                    console.log('Profesores cargados:', profesores);
+                    // Limpia las opciones existentes
+                    profesorSelect.innerHTML = '';
+                    // Añade nuevas opciones
+                    profesores.forEach(profesor => {
+                        const option = document.createElement('option');
+                        option.value = profesor.id; // Asegúrate de que este campo es correcto
+                        option.textContent = profesor.nombre;
+                        profesorSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los profesores:', error);
+                }
+            }
+            loadProfessors(); // Llama a la función para cargar los profesores
+            loadCourses();
+            loadEstudiante();
+       });
+       </script>
+</html>
+
+
+
+>>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
