@@ -5,6 +5,7 @@ const cursosController = require('../controllers/cursosController');
 const Profesor = require('../models/Profesor'); // Asegúrate de que el modelo Profesor esté bien importado
 const Estudiante = require('../models/Estudiante');
 const router = express.Router();
+const reportController = require('../controllers/generarReporte');
 // P�gina de inicio de sesi�n
 router.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'login.html'));
@@ -48,7 +49,7 @@ router.get('/admin/settings', (req, res) => {
 });  // <-- Aqu� estaba el par�ntesis faltante
 
 router.get('/admin/reports', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'views', 'admin-reports.html'));
+    res.sendFile(path.join(__dirname, '..', 'views', 'reportesAdministrador.html'));
 });
 // API para obtener datos 
 router.get('/api/user-info', (req, res) => {
@@ -58,10 +59,46 @@ router.get('/admin/courses', async (req, res) => {
     const estudiantes = await Estudiante.findAll(); // Obtener la lista de estudiantes desde la base de datos
     res.render('asignar-curso', { estudiantes }); // Renderiza la vista con la lista de estudiantes
 });
+// Ruta para generar y descargar el reporte
+//router.get('/descargar-reporte',reportController.generarReporte);
+
+
+/////////////////////////////////////////////////////////////
+//const { Curso, Profesor } = require('../models'); // Asegúrate de que las importaciones coincidan con tus nombres de archivos y exportaciones
+
+// Ruta para obtener cursos
+router.get('/api/cursos', async (req, res) => {
+    try {
+        const cursos = await Curso.findAll({
+            attributes: ['id', 'name'] // Asegúrate de que estos campos existen en tu modelo
+        });
+        res.json(cursos);
+    } catch (error) {
+        console.error('Error al obtener cursos:', error);
+        res.status(500).send(error);
+    }
+});
+
+// Ruta para obtener profesores
+router.get('/api/profesores', async (req, res) => {
+    try {
+        const profesores = await Profesor.findAll({
+            attributes: ['id', 'nombre'] // Asegúrate de que estos campos existen en tu modelo
+        });
+        res.json(profesores);
+    } catch (error) {
+        console.error('Error al obtener profesores:', error);
+        res.status(500).send(error);
+    }
+});
+
+////////////////////////////////////////////////////////////////////////
+
 // Procesar solicitudes POST
 router.post('/dashboard', authController.register);
 router.post('/crear-curso', cursosController.createCourse);
 router.get('/profesores', cursosController.getProfessors);
 router.post('/register', authController.register);
 router.get('/logout', authController.logout);
+router.post('/generar-reporte', reportController.generarReporte);
 module.exports = router;

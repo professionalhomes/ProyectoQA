@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reportes - TEC Consultas</title>
+    <script>
+    window.onload = function() {
+        cargarDatos('/api/cursos', document.getElementById('course'), 'name');
+        cargarDatos('/api/profesores', document.getElementById('professor'), 'nombre');
+        cargarDatos('/api/sedes', document.getElementById('campus'), 'nombre'); // Asumiendo que tienes una API para sedes
+
+        function cargarDatos(url, selectElement, dataField) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(item => {
+                        const option = new Option(item[dataField], item.id);
+                        selectElement.add(option);
+                    });
+                })
+                .catch(error => console.error('Error al cargar datos:', error));
+        }
+    }
+
+    function generarReporte() {
+        var formData = new FormData(document.getElementById('reportForm'));
+
+        fetch('/generar-reporte', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'reporte_administrador.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => console.error('Error al generar el reporte:', error));
+    }
+    </script>
+</head>
+<body>
+    <h1>Sistema de Reportes de Consulta</h1>
+    <form id="reportForm">
+        <fieldset>
+            <legend>Reportes de Cursos y Profesores</legend>
+            <label for="course">Curso:</label>
+            <select id="course" name="course">
+                <option value="">Todos los Cursos</option>
+            </select>
+
+            <label for="professor">Profesor:</label>
+            <select id="professor" name="professor">
+                <option value="">Todos los Profesores</option>
+            </select>
+
+            <label for="day">Día:</label>
+            <select id="day" name="day">
+                <option value="">Todos los Días</option>
+                <!-- Supongamos que quieres cargar dinámicamente los días también -->
+            </select>
+        </fieldset>
+
+        <fieldset>
+            <legend>Reportes de Estudiantes</legend>
+            <label for="campus">Sede:</label>
+            <select id="campus" name="campus">
+                <option value="">Todas las Sedes</option>
+            </select>
+
+            <label for="student-id">Carnet:</label>
+            <input type="text" id="student-id" name="student-id" placeholder="Ej. 2018489">
+        </fieldset>
+
+        <fieldset>
+            <legend>Citas de Consulta Asignadas</legend>
+            <label for="reserved">Tipo de Cita:</label>
+            <select id="reserved" name="reserved">
+                <option value="">Todos los Tipos</option>
+                <option value="reserved">Reservada</option>
+                <option value="not-reserved">No Reservada</option>
+            </select>
+        </fieldset>
+
+        <button type="button" onclick="generarReporte()">Generar Reporte</button>
+    </form>
+</body>
+</html>
+
+
+
