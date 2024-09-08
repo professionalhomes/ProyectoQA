@@ -84,7 +84,7 @@ const solicitarCita = async (req, res) => {
                     estudianteId: estudiante.id,
                     disponibilidadId: disponibilidad.id,
                     fecha: new Date(), // Ajustar según tu lógica
-                    duracion: 0,
+                    duracion: 10,
                     prioridad: prioridad
                 });
                 nuevaCita.reservada = true;

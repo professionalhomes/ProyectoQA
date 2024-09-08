@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const { sequelize } = require('../config/db');
 const pdfkit = require('pdfkit');
 const path = require('path');
@@ -7,20 +6,40 @@ const os = require('os'); // Para manejar archivos temporales
 
 exports.generarReporte = async (req, res) => {
     try {
-        const { estudiante, reserved } = req.body;
+        const { estudiante, reserved, course, professor, day } = req.body; // Añadir los nuevos parámetros
 
         // Crear condiciones dinámicas para la consulta SQL
         let whereConditions = [];
         let replacements = {};
 
+        // Filtrar por estudiante
         if (estudiante && estudiante !== 'todos') {
             whereConditions.push('C.estudianteId = :estudiante');
             replacements.estudiante = estudiante;
         }
 
+        // Filtrar por tipo de cita (estado)
         if (reserved && reserved !== 'todos') {
             whereConditions.push('C.estado = :reserved');
             replacements.reserved = reserved;
+        }
+
+        // Filtrar por curso
+        if (course && course !== 'todos') {
+            whereConditions.push('Cu.id = :course');
+            replacements.course = course;
+        }
+
+        // Filtrar por profesor
+        if (professor && professor !== 'todos') {
+            whereConditions.push('P.id = :professor');
+            replacements.professor = professor;
+        }
+
+        // Filtrar por día
+        if (day && day !== 'todos') {
+            whereConditions.push('D.dia = :day');
+            replacements.day = day;
         }
 
         const whereClause = whereConditions.length ? `WHERE ${whereConditions.join(' AND ')}` : '';
@@ -64,8 +83,6 @@ exports.generarReporte = async (req, res) => {
             replacements: replacements
         });
 
-        // Verificar el tipo y contenido de results
-        console.log('Resultados de la consulta:', results);
         if (!Array.isArray(results)) {
             throw new Error('El resultado de la consulta no es un array.');
         }
@@ -85,17 +102,17 @@ exports.generarReporte = async (req, res) => {
         doc.moveDown();
 
         results.forEach(cita => {
-            doc.fontSize(14).text(`Curso: ${cita.cursoCodigo} - ${cita.cursoNombre}`);
-            doc.fontSize(12).text(`Profesor: ${cita.profesorNombre}`);
-            doc.text(`Estudiante: ${cita.estudianteNombre}`);
-            doc.text(`Carnet: ${cita.estudianteCarnet}`);
-            doc.text(`Estrellas: ${cita.estudianteEstrellas}`);
-            doc.text(`Día: ${cita.dia}`);
-            doc.text(`Hora Inicio: ${cita.horaInicio}`);
-            doc.text(`Hora Fin: ${cita.horaFin}`);
-            doc.text(`Duración: ${cita.duracion} minutos`);
-            doc.text(`Estado de la Cita: ${cita.estado}`);
-            doc.text(`Prioridad: ${cita.prioridad}`);
+            const duracionEnMinutos = cita.duracion; // Asumiendo que la duración ya está en minutos
+            const duracionFormateada = duracionEnMinutos >= 60 
+                ? `${Math.floor(duracionEnMinutos / 60)} horas y ${duracionEnMinutos % 60} minutos`
+                : `${duracionEnMinutos} minutos`;
+            doc.fontSize(14).text(`CIta para el Curso: ${cita.cursoCodigo} - ${cita.cursoNombre}`);
+            doc.fontSize(12).text(``);
+            doc.fontSize(12).text(`
+                Del Profesor: ${cita.profesorNombre} al Estudiante: ${cita.estudianteNombre} 
+                con el nuemro de carnet ${cita.estudianteCarnet} de ${cita.estudianteEstrellas} estrellas, el dia ${cita.dia},   
+                que se encuentra en un estado ${cita.estado} con una duracion de ${duracionFormateada} `);
+            doc.fontSize(12).text(``);
             doc.moveDown();
         });
 
@@ -115,49 +132,8 @@ exports.generarReporte = async (req, res) => {
             });
         });
 
-        writeStream.on('error', (writeErr) => {
-            console.error('Error al escribir el archivo:', writeErr);
-            res.status(500).json({ error: 'Error al escribir el archivo PDF' });
-        });
-
     } catch (error) {
         console.error('Error al generar el reporte:', error);
         res.status(500).json({ error: 'Error al generar el reporte' });
     }
 };
-=======
-const PDFDocument = require('pdfkit');
-const Reporte = require('../models/Reporte');
-
-exports.generarReporte = function(req, res) {
-    const reporte = new Reporte('./config/db'); // Asegúrate de que la ruta a tu archivo de base de datos es correcta
-
-    reporte.obtenerDatosReporte((err, datos) => {
-        if (err) {
-            res.status(500).send('Error al obtener datos para el reporte');
-            return;
-        }
-
-        const doc = new PDFDocument();
-        let buffers = [];
-        doc.on('data', buffers.push.bind(buffers));
-        doc.on('end', () => {
-            let pdfData = Buffer.concat(buffers);
-            res.writeHead(200, {
-                'Content-Length': Buffer.byteLength(pdfData),
-                'Content-Type': 'application/pdf',
-                'Content-disposition': 'attachment;filename=reporte_administrador.pdf',
-            }).end(pdfData);
-        });
-
-        doc.fontSize(16).text('Reporte del Administrador', 100, 50);
-        doc.fontSize(12).text('Datos del Reporte:', 100, 100);
-        
-        datos.forEach((dato, index) => {
-            doc.text(`${index + 1}. Dato: ${dato.alguna_columna}`, 100, 130 + index * 20);
-        });
-
-        doc.end();
-    });
-};
->>>>>>> 46e71e5ccfa3a90d0ee11e0af58ba6ee36cf6c58
