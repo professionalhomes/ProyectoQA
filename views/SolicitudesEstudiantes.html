@@ -85,6 +85,9 @@
                 feedback.style.display = 'none'; // Ocultar mensajes de error previos
 
                 try {
+                    const userResponse = await fetch('/api/user-info');
+                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                    const userData = await userResponse.json();
                     const cursoId = cursoSelect.value;
                     if (!cursoId) {
                         alert('Por favor, selecciona un curso.');
@@ -96,7 +99,7 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ cursoId }),
+                        body: JSON.stringify({ cursoId, userData }),
                     });
 
                     if (!response.ok) throw new Error('Error en la solicitud de citas');

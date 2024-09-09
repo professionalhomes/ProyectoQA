@@ -65,13 +65,13 @@ exports.generarReporte = async (req, res) => {
             FROM 
                 citas C
             JOIN 
-                Estudiantes E ON C.estudianteId = E.id
+                Estudiantes E ON C.Id = E.id
             JOIN 
-                disponibilidades D ON C.disponibilidadId = D.id
+                disponibilidades D ON C.Id = D.id
             JOIN 
-                Cursos Cu ON D.cursoId = Cu.id
+                Cursos Cu ON D.Id = Cu.id
             JOIN 
-                profesores P ON D.profesorId = P.id
+                profesores P ON D.Id = P.id
             ${whereClause}
             ORDER BY 
                 C.fecha ASC

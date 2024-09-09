@@ -80,7 +80,12 @@
             // Validación y manejo del envío del formulario
             document.querySelector('#create-disponibilidad-form').addEventListener('submit', async function (event) {
                 event.preventDefault();
+                const userResponse = await fetch('/api/user-info');
+                    if (!userResponse.ok) throw new Error('Error en la solicitud de usuario');
+                    const userData = await userResponse.json();
+
                 const formData = {
+                    Userid: userData.id,
                     cursoId: document.getElementById('cursoId').value,
                     dia: document.getElementById('dia').value,
                     horaInicio: document.getElementById('horaInicio').value,

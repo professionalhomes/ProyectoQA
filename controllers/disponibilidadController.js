@@ -27,11 +27,12 @@ exports.getCursosPorProfesor = async (req, res) => {
 
 exports.createDisponibilidad = async (req, res) => {
     try {
-        const { profesorId, cursoId, dia, horaInicio, horaFin, cantidadCitas } = req.body;
+        const { Userid, cursoId, dia, horaInicio, horaFin, cantidadCitas } = req.body;
         console.log('Datos del formulario:', req.body);
-        if (!profesorId || !cursoId || !dia || !horaInicio || !horaFin || !cantidadCitas) {
+        if (!Userid || !cursoId || !dia || !horaInicio || !horaFin || !cantidadCitas) {
             return res.status(400).json({ error: 'Faltan datos requeridos' });
         }
+        const profesorId = Userid ;
         const disponibilidad = await Disponibilidad.create({
             profesorId,
             cursoId,
