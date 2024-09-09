@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,121 +10,145 @@
             display: none;
             color: red;
         }
+
         .loading {
             display: none;
         }
     </style>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const cursoSelect = document.getElementById('course');
-        const estudianteSelect = document.getElementById('estudiante');
-        const profesorSelect = document.getElementById('professor');
-        const feedback = document.querySelector('.feedback');
-        const loading = document.querySelector('.loading');
-        
-        async function loadCourses() {
-            try {
-                const response = await fetch('/cursos');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const cursos = await response.json();
-                cursoSelect.innerHTML = '<option value="todos">Todos los Cursos</option>';
-                cursos.forEach(curso => {
-                    const option = document.createElement('option');
-                    option.value = curso.id;
-                    // Corrección: Usar backticks para plantillas literales
-                    option.textContent = `${curso.codigo} (${curso.name}) (${curso.id})`;
-                    cursoSelect.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error al cargar los cursos:', error);
-                feedback.textContent = 'Error al cargar los cursos. Por favor, inténtelo de nuevo.';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const cursoSelect = document.getElementById('course');
+            const estudianteSelect = document.getElementById('estudiante');
+            const profesorSelect = document.getElementById('professor');
+            const feedback = document.querySelector('.feedback');
+            const loading = document.querySelector('.loading');
+
+            // Función para mostrar mensajes de error
+            function showError(message) {
+                feedback.textContent = message;
                 feedback.style.display = 'block';
             }
-        }
-        
-        async function loadEstudiante() {
-            try {
-                const response = await fetch('/estudiantes');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const estudiantes = await response.json();
-                estudianteSelect.innerHTML = '<option value="todos">Todos los Estudiantes</option>';
-                estudiantes.forEach(estudiante => {
-                    const option = document.createElement('option');
-                    option.value = estudiante.id;
-                    // Corrección: Usar backticks para plantillas literales
-                    option.textContent = `${estudiante.nombre} (${estudiante.carnet})`;
-                    estudianteSelect.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error al cargar los estudiantes:', error);
-                feedback.textContent = 'Error al cargar los estudiantes. Por favor, inténtelo de nuevo.';
+
+            // Función para cargar cursos
+            async function loadCourses() {
+                try {
+                    const response = await fetch('/cursos');
+                    if (!response.ok) throw new Error('Error al cargar los cursos');
+                    const cursos = await response.json();
+                    cursoSelect.innerHTML = '<option value="">Todos los Cursos</option>';
+                    cursos.forEach(curso => {
+                        const option = document.createElement('option');
+                        option.value = curso.id;
+                        option.textContent = `${curso.codigo} (${curso.name})`;
+                        cursoSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los cursos:', error);
+                    showError('Error al cargar los cursos. Por favor, inténtelo de nuevo.');
+                }
+            }
+
+            // Función para cargar estudiantes
+            async function loadEstudiante() {
+                try {
+                    const response = await fetch('/estudiantes');
+                    if (!response.ok) throw new Error('Error al cargar los estudiantes');
+                    const estudiantes = await response.json();
+                    estudianteSelect.innerHTML = '<option value="">Todos los Estudiantes</option>';
+                    estudiantes.forEach(estudiante => {
+                        const option = document.createElement('option');
+                        option.value = estudiante.id;
+                        option.textContent = `${estudiante.nombre} (${estudiante.carnet})`;
+                        estudianteSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los estudiantes:', error);
+                    showError('Error al cargar los estudiantes. Por favor, inténtelo de nuevo.');
+                }
+            }
+
+            // Función para cargar profesores
+            async function loadProfessors() {
+                try {
+                    const response = await fetch('/profesores');
+                    if (!response.ok) throw new Error('Error al cargar los profesores');
+                    const profesores = await response.json();
+                    profesorSelect.innerHTML = '<option value="">Todos los Profesores</option>';
+                    profesores.forEach(profesor => {
+                        const option = document.createElement('option');
+                        option.value = profesor.id;
+                        option.textContent = profesor.nombre;
+                        profesorSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los profesores:', error);
+                    showError('Error al cargar los profesores. Por favor, inténtelo de nuevo.');
+                }
+            }
+
+            // Cargar datos al iniciar la página
+            loadProfessors();
+            loadCourses();
+            loadEstudiante();
+        });
+
+        // Función para generar el reporte
+        async function generarReporte(event) {
+            event.preventDefault(); // Previene el envío tradicional del formulario
+
+            const formData = new FormData(document.getElementById('reportForm'));
+            const feedback = document.querySelector('.feedback');
+            const loading = document.querySelector('.loading');
+
+            // Validación de entradas del formulario antes de enviar
+            const curso = formData.get('course');
+            const profesor = formData.get('professor');
+            const estudiante = formData.get('estudiante');
+            const day = formData.get('day');
+            const reserved = formData.get('reserved');
+
+            // Validar que los campos seleccionados tengan valores válidos
+            if (!/^[a-zA-Z0-9]*$/.test(curso) || !/^[a-zA-Z0-9]*$/.test(profesor) || !/^[a-zA-Z0-9]*$/.test(estudiante)) {
+                feedback.textContent = 'Seleccione valores válidos para los campos.';
                 feedback.style.display = 'block';
+                return;
+            }
+
+            try {
+                loading.style.display = 'block'; // Mostrar spinner de carga
+
+                const response = await fetch('/generar-reporte', {
+                    method: 'POST',
+                    body: new URLSearchParams(formData).toString(),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                });
+
+                if (!response.ok) throw new Error('Error al generar el reporte');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'reporte_administrador.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error al generar el reporte:', error);
+                feedback.textContent = 'Error al generar el reporte. Por favor, inténtelo de nuevo.';
+                feedback.style.display = 'block';
+            } finally {
+                loading.style.display = 'none'; // Ocultar spinner de carga
             }
         }
-        
-        async function loadProfessors() {
-            try {
-                const response = await fetch('/profesores');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const profesores = await response.json();
-                profesorSelect.innerHTML = '<option value="todos">Todos los Profesores</option>';
-                profesores.forEach(profesor => {
-                    const option = document.createElement('option');
-                    option.value = profesor.id;
-                    option.textContent = profesor.nombre;
-                    profesorSelect.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error al cargar los profesores:', error);
-                feedback.textContent = 'Error al cargar los profesores. Por favor, inténtelo de nuevo.';
-                feedback.style.display = 'block';
-            }
-        }
-        
-        loadProfessors();
-        loadCourses();
-        loadEstudiante();
-    });
-    
-    async function generarReporte(event) {
-        event.preventDefault(); // Prevent the default form submission
 
-        const formData = new FormData(document.getElementById('reportForm'));
-        const feedback = document.querySelector('.feedback');
-        const loading = document.querySelector('.loading');
-        
-        try {
-            loading.style.display = 'block'; // Show loading spinner or message
-
-            const response = await fetch('/generar-reporte', {
-                method: 'POST',
-                body: new URLSearchParams(formData).toString(),
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-            });
-
-            if (!response.ok) throw new Error('Error al generar el reporte');
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'reporte_administrador.pdf';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            loading.style.display = 'none'; // Hide loading spinner or message
-        } catch (error) {
-            console.error('Error al generar el reporte:', error);
-            feedback.textContent = 'Error al generar el reporte. Por favor, inténtelo de nuevo.';
-            feedback.style.display = 'block';
-            loading.style.display = 'none'; // Hide loading spinner or message
-        }
-    }
     </script>
 </head>
+
 <body>
     <h1>Sistema de Reportes de Consulta</h1>
     <form id="reportForm" onsubmit="generarReporte(event)">
@@ -177,3 +202,101 @@
     <div class="loading">Generando reporte, por favor espere...</div>
 </body>
 </html>
+
+
+</html>
+
+<style>
+    /* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fa;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+/* Estilos para el encabezado */
+h1 {
+    text-align: center;
+    color: #4a90e2;
+    margin-bottom: 20px;
+}
+
+/* Estilos del formulario */
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos de fieldsets */
+fieldset {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+/* Estilos de leyendas */
+legend {
+    padding: 0 10px;
+    font-weight: bold;
+    color: #4a90e2;
+}
+
+/* Estilos para las etiquetas */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+/* Estilos para los selectores */
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Estilos del botón */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #357abd;
+}
+
+/* Estilos para mensajes de error */
+.feedback {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Estilos para la carga */
+.loading {
+    display: none;
+    color: #4a90e2;
+    font-size: 14px;
+    text-align: center;
+}
+
+</style>

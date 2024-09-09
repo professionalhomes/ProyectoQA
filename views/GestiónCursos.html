@@ -12,88 +12,122 @@
     <form id="courseForm">
         <div>
             <label for="codigo">Código:</label>
-            <input type="text" id="codigo" name="codigo" required>
+            <input type="text" id="codigo" name="codigo" required pattern="^[A-Za-z0-9]{1,10}$" title="El código debe ser alfanumérico y no exceder 10 caracteres.">
         </div>
         <div>
             <label for="name">Nombre del Curso:</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name" required pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$" title="El nombre no debe contener caracteres especiales y debe tener un máximo de 50 caracteres.">
         </div>
         <div>
             <label for="description">Descripción:</label>
-            <textarea id="description" name="description"></textarea>
+            <textarea id="description" name="description" maxlength="200" title="La descripción no debe exceder 200 caracteres."></textarea>
         </div>
         <div>
             <label for="semester">Semestre:</label>
-            <select type="text" id="semester" name="semester" required>
+            <select id="semester" name="semester" required>
                 <option value="Primer Semestre">2024 - Primer Semestre</option>
                 <option value="Segundo Semestre">2024 - Segundo Semestre</option>
             </select>
         </div>
         <div>
             <label for="credits">Créditos:</label>
-            <input type="number" id="credits" name="credits" required>
+            <input type="number" id="credits" name="credits" required min="1" max="10" title="Los créditos deben estar entre 1 y 10.">
         </div>
         <div>
             <label for="profesor_id">Profesor:</label>
             <select id="profesor_id" name="profesor_id" required>
-                <!-- Opciones estáticas para prueba -->
+                <option value="">Seleccione un profesor</option>
             </select>
         </div>
-        <button type="submit">Crear</button>
+        <button type="submit" id="submitBtn" disabled>Crear</button>
     </form>
+    <div id="error-message" style="color: red; display: none;">Error al cargar los datos. Por favor, inténtelo de nuevo más tarde.</div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             console.log('DOM completamente cargado y parseado');
             const profesorSelect = document.getElementById('profesor_id');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Función para mostrar mensajes de error
+            function showError(message) {
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                submitBtn.disabled = true;
+            }
+
             // Función para cargar profesores
             async function loadProfessors() {
                 try {
                     const response = await fetch('/profesores');
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Error en la solicitud de profesores');
                     const profesores = await response.json();
                     console.log('Profesores cargados:', profesores);
-                    // Limpia las opciones existentes
-                    profesorSelect.innerHTML = '';
-                    // Añade nuevas opciones
+                    profesorSelect.innerHTML = '<option value="">Seleccione un profesor</option>';
                     profesores.forEach(profesor => {
                         const option = document.createElement('option');
-                        option.value = profesor.id; // Asegúrate de que este campo es correcto
+                        option.value = profesor.id;
                         option.textContent = profesor.nombre;
                         profesorSelect.appendChild(option);
                     });
+                    submitBtn.disabled = false;
                 } catch (error) {
                     console.error('Error al cargar los profesores:', error);
+                    showError('Error al cargar los profesores. Por favor, inténtelo de nuevo más tarde.');
                 }
             }
-            loadProfessors(); // Llama a la función para cargar los profesores
+
+            loadProfessors();
+
             // Manejo del envío del formulario
             document.querySelector('#courseForm').addEventListener('submit', async function (event) {
-                event.preventDefault(); // Evita el envío del formulario tradicional
+                event.preventDefault();
                 const formData = new FormData(event.target);
                 const data = Object.fromEntries(formData.entries());
+
+                // Validaciones adicionales antes de enviar
+                if (!data.codigo || !/^[A-Za-z0-9]{1,10}$/.test(data.codigo)) {
+                    alert('El código debe ser alfanumérico y no exceder 10 caracteres.');
+                    return;
+                }
+                if (!data.name || !/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{1,50}$/.test(data.name)) {
+                    alert('El nombre no debe contener caracteres especiales y debe tener un máximo de 50 caracteres.');
+                    return;
+                }
+                if (isNaN(data.credits) || data.credits < 1 || data.credits > 10) {
+                    alert('Los créditos deben estar entre 1 y 10.');
+                    return;
+                }
+                if (!data.profesor_id) {
+                    alert('Debe seleccionar un profesor.');
+                    return;
+                }
+
                 try {
                     const response = await fetch('/crear-curso', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     });
+                    const result = await response.json();
                     if (!response.ok) {
                         if (result.errors) {
                             result.errors.forEach(error => {
-                                alert(error.msg); // Mostrar cada error en una alerta
+                                alert(error.msg);
                             });
                         } else {
-                            alert(result.error || 'Error al registrar ');
+                            alert(result.error || 'Error al registrar.');
                         }
                     } else {
                         alert('Registro exitoso');
-                        courseForm.reset();
+                        document.getElementById('courseForm').reset();
+                        submitBtn.disabled = true;
+                        loadProfessors();
                     }
                 } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error al registrar ');
+                    console.error('Error al registrar:', error);
+                    alert('Error al registrar. Por favor, inténtelo de nuevo.');
                 }
             });
         });
@@ -101,3 +135,84 @@
 </body>
 
 </html>
+
+<style>
+    /* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fa;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+/* Estilos para el encabezado */
+h1 {
+    text-align: center;
+    color: #4a90e2;
+    margin-bottom: 20px;
+}
+
+/* Estilos del formulario */
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para las etiquetas */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+/* Estilos para los campos de entrada y selectores */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/* Estilos del botón */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+    background-color: #357abd;
+}
+
+/* Estilos para el mensaje de error */
+#error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+</style>

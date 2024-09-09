@@ -28,9 +28,6 @@ router.get('/professor/availability', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'CrearDisponibilidad.html'));
 });
 
-router.get('/professor/appointments', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'views', 'ver-citas.html'));
-});
 
 router.get('/professor/students', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'views', 'Solicitudes.html'));
@@ -120,4 +117,6 @@ router.post('/cambiarestrella', EstudianteController.updateEstrellas);
 router.post('/solicitar-cita', solicitarCitaController.solicitarCita);
 router.post('/generar-reporte', reportController.generarReporte);
 
+
 module.exports = router;
+

@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Curso</title>
 </head>
-
 <body>
     <h1>Crear Curso</h1>
     <form id="courseForm">
         <div>
             <label for="Curso_id">Curso:</label>
-            <select type="text" id="Curso_id" name="Curso_id" required>
+            <select id="Curso_id" name="Curso_id" required>
+                <option value="">Seleccione un curso</option>
+                <!-- Opciones de cursos serán cargadas aquí -->
             </select>
         </div>
         <div>
             <label for="estudiante_id">Estudiante:</label>
-            <select type="text" id="estudiante_id" name="estudiante_id" required>
+            <select id="estudiante_id" name="estudiante_id" required>
+                <option value="">Seleccione un estudiante</option>
+                <!-- Opciones de estudiantes serán cargadas aquí -->
             </select>
         </div>
-        <button type="submit">Crear</button>
+        <button type="submit" id="submitBtn" disabled>Crear</button>
     </form>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             console.log('DOM completamente cargado y parseado');
-            const profesorSelect = document.getElementById('Curso_id');
-            const estudianteSelect = document.getElementById('estudiante_id'); // Corrected the id
+            const cursoSelect = document.getElementById('Curso_id');
+            const estudianteSelect = document.getElementById('estudiante_id');
+            const submitBtn = document.getElementById('submitBtn');
+
             // Función para cargar cursos
             async function loadCourses() {
                 try {
@@ -36,73 +41,169 @@
                     }
                     const cursos = await response.json();
                     console.log('Cursos cargados:', cursos);
-                    // Limpia las opciones existentes
-                    profesorSelect.innerHTML = '';
-                    // Añade nuevas opciones
+                    cursoSelect.innerHTML = '<option value="">Seleccione un curso</option>'; // Limpia y añade la opción predeterminada
                     cursos.forEach(curso => {
                         const option = document.createElement('option');
                         option.value = curso.id;
                         option.textContent = `${curso.codigo} (${curso.name}) (${curso.id})`;
-                        profesorSelect.appendChild(option);
+                        cursoSelect.appendChild(option);
                     });
+                    checkFormReady();
                 } catch (error) {
                     console.error('Error al cargar los cursos:', error);
+                    alert('Error al cargar los cursos. Por favor, intente de nuevo más tarde.');
+                    submitBtn.disabled = true;
                 }
             }
+
             // Función para cargar estudiantes
             async function loadEstudiante() {
                 try {
-                    const response = await fetch('/estudiantes'); 
+                    const response = await fetch('/estudiantes');
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
                     const estudiantes = await response.json();
                     console.log('Estudiantes cargados:', estudiantes);
-                    // Limpia las opciones existentes
-                    estudianteSelect.innerHTML = ''; // Now clearing estudianteSelect
-                    // Añade nuevas opciones
+                    estudianteSelect.innerHTML = '<option value="">Seleccione un estudiante</option>'; // Limpia y añade la opción predeterminada
                     estudiantes.forEach(estudiante => {
-                        console.log('Estudiante:', estudiante); // Verifica que el curso tiene los datos esperados
                         const option = document.createElement('option');
                         option.value = estudiante.id;
-                        option.textContent = `${estudiante.nombre} (${estudiante.carnet})`; // 
+                        option.textContent = `${estudiante.nombre} (${estudiante.carnet})`;
                         estudianteSelect.appendChild(option);
                     });
+                    checkFormReady();
                 } catch (error) {
                     console.error('Error al cargar los estudiantes:', error);
+                    alert('Error al cargar los estudiantes. Por favor, intente de nuevo más tarde.');
+                    submitBtn.disabled = true;
                 }
             }
+
+            // Función para habilitar el botón de envío solo si ambos selects tienen opciones
+            function checkFormReady() {
+                if (cursoSelect.options.length > 1 && estudianteSelect.options.length > 1) {
+                    submitBtn.disabled = false;
+                }
+            }
+
+            // Cargar cursos y estudiantes al cargar la página
             loadCourses();
             loadEstudiante();
+
+            // Validación y manejo del envío del formulario
             document.querySelector('#courseForm').addEventListener('submit', async function (event) {
-                event.preventDefault(); // Prevents the traditional form submission
+                event.preventDefault();
                 const formData = new FormData(event.target);
                 const data = Object.fromEntries(formData.entries());
+
+                // Validaciones adicionales antes de enviar
+                if (!data.Curso_id || !data.estudiante_id) {
+                    alert('Debe seleccionar un curso y un estudiante.');
+                    return;
+                }
+
                 try {
                     const response = await fetch('/asignar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     });
-                    const result = await response.json(); // Parse the JSON response
+
+                    const result = await response.json();
+
                     if (!response.ok) {
-                        if (result.errors) {
-                            result.errors.forEach(error => {
-                                alert(error.msg); // Display each error in an alert
-                            });
-                        } else {
-                            alert(result.error || 'Error al registrar');
-                        }
+                        alert(result.error || 'Error al registrar. Revise los datos ingresados.');
                     } else {
                         alert('Registro exitoso');
-                        event.target.reset(); // Reset the form after successful submission
+                        event.target.reset();
+                        submitBtn.disabled = true; // Deshabilitar el botón hasta que se recarguen los datos
+                        loadCourses();
+                        loadEstudiante();
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Error al registrar');
+                    alert('Error al registrar. Por favor, intente de nuevo.');
                 }
             });
         });
     </script>
 </body>
 </html>
+
+<style>
+   /* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fa;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+/* Estilos para el encabezado */
+h1 {
+    text-align: center;
+    color: #4a90e2;
+    margin-bottom: 20px;
+}
+
+/* Estilos del formulario */
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para las etiquetas */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+/* Estilos para los selectores */
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Estilos del botón */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+    background-color: #357abd;
+}
+
+/* Estilos para mensajes de error */
+.alert {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+</style>
